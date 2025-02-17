@@ -2,6 +2,8 @@
 
 This is a userscript that provides an elegant usage monitor for ChatGPT models, including daily quota tracking. It allows you to monitor the usage of different ChatGPT models in real-time, track daily limits, and configure model mappings and daily quotas.
 
+![Image](https://github.com/user-attachments/assets/0c176427-0679-4f1d-aabc-c4b3c7b45701)
+
 ## Features
 
 - **Real-time Model Usage Tracking**: Monitors the usage of different ChatGPT models in real-time.
