@@ -5,7 +5,7 @@
 // @updateURL    https://raw.githubusercontent.com/tizee/tempermonkey-chatgpt-model-usage-monitor/main/monitor.js
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=chatgpt.com
 // @author       tizee
-// @version      1.0
+// @version      1.1
 // @description  Elegant usage monitor for ChatGPT models with daily quota tracking
 // @match        https://chatgpt.com/
 // @match        https://chatgpt.com/c/*
@@ -101,7 +101,7 @@
     user-select: none;
   }
 
-    #chatUsageMonitor header {
+  #chatUsageMonitor header {
     padding: 0 ${STYLE.spacing.md};
     display: flex;
     border-radius: ${STYLE.borderRadius} ${STYLE.borderRadius} 0 0;
@@ -114,7 +114,7 @@
     width: 12px;
     height: 12px;
     position: absolute;
-    left: 8px;
+    right: 8px;
     top: 50%;
     transform: translateY(-50%);
     border-radius: 50%;
@@ -128,7 +128,6 @@
   }
 
   #chatUsageMonitor header button {
-    margin-left: 24px;
     border: none;
     background: none;
     color: ${COLORS.secondaryText};
@@ -262,7 +261,6 @@
 
   // State Management
   let usageData = GM_getValue("usageData", defaultUsageData);
-  // 确保现有数据包含 position 字段
   if (!usageData.position) {
     usageData.position = { x: null, y: null };
     GM_setValue("usageData", usageData);
@@ -592,7 +590,7 @@
         maxY
       )}px`;
     } else {
-      // 如果没有保存的位置，使用默认的右下角位置
+      // bottom-right by default
       container.style.right = STYLE.spacing.lg;
       container.style.bottom = STYLE.spacing.lg;
       container.style.left = "auto";
@@ -600,11 +598,10 @@
     }
 
     function handleDragStart(e) {
-      if (e.target.tagName === "BUTTON" || e.target.tagName === "INPUT") return;
+      if (!e.target.classList.contains("drag-handle")) return;
 
       isDragging = true;
 
-      // 如果是从默认位置开始拖动，需要转换为 left/top 定位
       if (container.style.right !== "auto") {
         const rect = container.getBoundingClientRect();
         container.style.right = "auto";
@@ -616,6 +613,7 @@
       initialX = e.clientX - container.offsetLeft;
       initialY = e.clientY - container.offsetTop;
     }
+
 
     function handleDrag(e) {
       if (!isDragging) return;
@@ -670,27 +668,8 @@
     header.appendChild(settingsTabBtn);
     container.appendChild(header);
 
-    // 修改拖拽相关代码
-    container.style.cursor = "default"; // 移除整体的 move 光标
+    container.style.cursor = "default";
 
-    function handleDragStart(e) {
-      // 只允许通过拖拽手柄移动
-      if (!e.target.classList.contains("drag-handle")) return;
-
-      isDragging = true;
-
-      // 如果是从默认位置开始拖动，需要转换为 left/top 定位
-      if (container.style.right !== "auto") {
-        const rect = container.getBoundingClientRect();
-        container.style.right = "auto";
-        container.style.bottom = "auto";
-        container.style.left = `${rect.left}px`;
-        container.style.top = `${rect.top}px`;
-      }
-
-      initialX = e.clientX - container.offsetLeft;
-      initialY = e.clientY - container.offsetTop;
-    }
 
     // Create content panels
     const usageContent = document.createElement("div");
