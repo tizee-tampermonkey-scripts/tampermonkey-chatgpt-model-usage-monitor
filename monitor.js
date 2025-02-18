@@ -5,7 +5,7 @@
 // @updateURL    https://raw.githubusercontent.com/tizee/tempermonkey-chatgpt-model-usage-monitor/main/monitor.js
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=chatgpt.com
 // @author       tizee
-// @version      1.2
+// @version      1.3
 // @description  Elegant usage monitor for ChatGPT models with daily quota tracking
 // @match        https://chatgpt.com/
 // @match        https://chatgpt.com/c/*
@@ -36,6 +36,14 @@
         gray: "oklch(.92 .004 286.32)",
         yellow: "oklch(.905 .182 98.111)",
         green: "oklch(.845 .143 164.978)",
+        // Red for low usage
+        progressLow: "#EF4444",
+        // Orange for medium usage
+        progressMed: "#F59E0B",
+        // Green for high usage
+        progressHigh: "#10B981",
+        // Gray for exceeded
+        progressExceed: "#4B5563",
     };
 
     const STYLE = {
@@ -174,12 +182,6 @@
     color: ${COLORS.yellow};
   }
 
-  #chatUsageMonitor .progress-bar {
-    height: 100%;
-    transition: width 0.3s ease, background-color 0.3s ease;
-    border-radius: 6px;
-  }
-
   #chatUsageMonitor .btn {
     padding: ${STYLE.spacing.sm} ${STYLE.spacing.md};
     border: none;
@@ -222,15 +224,93 @@
     background: ${COLORS.secondaryText};
   }
 
-    #chatUsageMonitor .progress-container {
-      width: 100%;
-      background: ${COLORS.surface};
-      margin-top: ${STYLE.spacing.xs};
-      border-radius: 6px;
-      overflow: hidden;
-      height: 6px;
-      margin-top: ${STYLE.spacing.xs};
+  #chatUsageMonitor .progress-container {
+        width: 100%;
+        background: ${COLORS.surface};
+        margin-top: ${STYLE.spacing.xs};
+        border-radius: 6px;
+        overflow: hidden;
+        height: 8px; /* Slightly taller for better visibility */
+        position: relative;
     }
+
+  #chatUsageMonitor .progress-bar {
+        height: 100%;
+        transition: width 0.3s ease;
+        border-radius: 6px;
+        background: linear-gradient(
+            90deg,
+            ${COLORS.progressLow} 0%,
+            ${COLORS.progressMed} 50%,
+            ${COLORS.progressHigh} 100%
+        );
+        background-size: 200% 100%;
+        animation: gradientShift 2s linear infinite;
+  }
+
+  #chatUsageMonitor .progress-bar.low-usage {
+        animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  #chatUsageMonitor .progress-bar.exceeded {
+      background: ${COLORS.progressExceed};
+      animation: none;
+  }
+
+  @keyframes gradientShift {
+      0% { background-position: 100% 0; }
+      100% { background-position: -100% 0; }
+  }
+
+  @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+      70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+  }
+
+ /* Dot-based progression system */
+  #chatUsageMonitor .dot-progress {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      height: 8px;
+  }
+
+  #chatUsageMonitor .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+  }
+
+  #chatUsageMonitor .dot-empty {
+      background: rgba(239, 68, 68, 0.3);
+      border: 1px solid ${COLORS.progressLow};
+  }
+
+  #chatUsageMonitor .dot-partial {
+      background: ${COLORS.progressMed};
+  }
+
+  #chatUsageMonitor .dot-full {
+      background: ${COLORS.progressHigh};
+  }
+
+  #chatUsageMonitor .dot-exceeded {
+      background: ${COLORS.progressExceed};
+      position: relative;
+  }
+
+  #chatUsageMonitor .dot-exceeded::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: -2px;
+      right: -2px;
+      height: 2px;
+      background: ${COLORS.surface};
+      transform: rotate(45deg);
+  }
 
   #chatUsageMonitor .table-header {
     font-family: monospace;
@@ -241,22 +321,21 @@
     align-items: center;
     grid-template-columns: 2fr 1.5fr 1.5fr 2fr;
   }
- #chatUsageMonitor .model-row {
-    font-family: monospace;
-    color: ${COLORS.secondaryText};
-    transition: color 0.2s ease;
-    font-size:  ${STYLE.textSize.xs};
-    line-height: ${STYLE.lineHeight.xs};
-    display : grid;
-    grid-template-columns: 2fr 1.5fr 1.5fr 2fr;
-    align-items: center;
-  }
+  #chatUsageMonitor .model-row {
+     font-family: monospace;
+     color: ${COLORS.secondaryText};
+     transition: color 0.2s ease;
+     font-size:  ${STYLE.textSize.xs};
+     line-height: ${STYLE.lineHeight.xs};
+     display : grid;
+     grid-template-columns: 2fr 1.5fr 1.5fr 2fr;
+     align-items: center;
+   }
   #chatUsageMonitor .model-row:hover {
-    color: ${COLORS.yellow};
-    text-decoration-line: underline;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+     color: ${COLORS.yellow};
+     text-decoration-line: underline;
+     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   }
-
 `);
 
     // State Management
@@ -303,6 +382,8 @@
         return row;
     }
 
+    // Add a configuration option for dot vs bar progress
+    const USE_DOT_PROGRESS = true; // Set to true to use dot-based progression
     function createUsageModelRow(model, modelKey) {
         const row = document.createElement("div");
         row.className = "model-row";
@@ -325,36 +406,70 @@
 
         // Progress Bar cell (retain default font)
         const progressCell = document.createElement("div");
-        progressCell.style.fontFamily = "inherit"; // do not force monospace here
         if (model.dailyLimit > 0) {
-            const progressContainer = document.createElement("div");
-            progressContainer.className = "progress-container";
-            progressContainer.style.margin = "0";
-            const progressBar = document.createElement("div");
-            progressBar.className = "progress-bar";
-            const usedPercent = Math.min((model.count / model.dailyLimit) * 100, 100);
-            progressBar.style.width = `${usedPercent}%`;
-            const remainingPercent =
-                  (model.dailyLimit - model.count) / model.dailyLimit;
-            progressBar.style.background = getStatusColor(
-                remainingPercent,
-                model.dailyLimit
-            );
-            progressContainer.appendChild(progressBar);
-            progressCell.appendChild(progressContainer);
+            const usagePercent = model.count / model.dailyLimit;
+
+            if (USE_DOT_PROGRESS) {
+                // Dot-based progress implementation
+                const dotContainer = document.createElement("div");
+                dotContainer.className = "dot-progress";
+                const totalDots = 8;
+
+                for (let i = 0; i < totalDots; i++) {
+                    const dot = document.createElement("div");
+                    dot.className = "dot";
+
+                    const dotThreshold = (i + 1) / totalDots;
+                    if (usagePercent >= 1) {
+                        dot.classList.add("dot-exceeded");
+                    } else if (usagePercent >= dotThreshold) {
+                        dot.classList.add("dot-full");
+                    } else if (usagePercent >= dotThreshold - 0.1) {
+                        dot.classList.add("dot-partial");
+                    } else {
+                        dot.classList.add("dot-empty");
+                    }
+
+                    dotContainer.appendChild(dot);
+                }
+                progressCell.appendChild(dotContainer);
+            } else {
+                // Enhanced progress bar implementation
+                const progressContainer = document.createElement("div");
+                progressContainer.className = "progress-container";
+
+                const progressBar = document.createElement("div");
+                progressBar.className = "progress-bar";
+
+                if (usagePercent > 1) {
+                    progressBar.classList.add("exceeded");
+                } else if (usagePercent < 0.3) {
+                    progressBar.classList.add("low-usage");
+                }
+
+                progressBar.style.width = `${Math.min(usagePercent * 100, 100)}%`;
+
+                progressContainer.appendChild(progressBar);
+                progressCell.appendChild(progressContainer);
+            }
+        } else {
+            progressCell.style.width = `100%`;
         }
         row.appendChild(progressCell);
 
         return row;
     }
-
+    // Update the getStatusColor function to match new color logic
     function getStatusColor(remainingPercent, hasLimit) {
-        if (!hasLimit) return COLORS.success;
-        if (remainingPercent <= 0) return COLORS.disabled;
-        if (remainingPercent <= 0.2) return COLORS.danger;
-        if (remainingPercent <= 0.5) return COLORS.warning;
-        return COLORS.success;
+        if (!hasLimit) return COLORS.progressHigh;
+        const usagePercent = 1 - remainingPercent;
+
+        if (remainingPercent < 0) return COLORS.progressExceed;
+        if (usagePercent <= 0.3) return COLORS.progressLow;
+        if (usagePercent <= 0.7) return COLORS.progressMed;
+        return COLORS.progressHigh;
     }
+
 
     // Event Handlers
     function handleDeleteModel(modelKey) {
@@ -380,7 +495,6 @@
         container.innerHTML = "";
 
         // Title Section
-
         const subtitle = document.createElement("div");
         subtitle.textContent = `${getToday()}`;
         subtitle.style.fontSize = `${STYLE.textSize.xs}`;
@@ -529,25 +643,25 @@
             console.debug(
                 `[monitor] No mapping found for model "${modelId}". Creating new entry.`
       );
-        usageData.models[modelId] = {
-            displayName: modelId,
-            count: 0,
-            dailyLimit: 0,
-            lastUpdate: "",
-        };
+            usageData.models[modelId] = {
+                displayName: modelId,
+                count: 0,
+                dailyLimit: 0,
+                lastUpdate: "",
+            };
+        }
+
+        const model = usageData.models[modelId];
+        model.count += 1;
+        model.lastUpdate = new Date().toLocaleTimeString();
+
+        if (model.dailyLimit > 0 && model.count > model.dailyLimit) {
+            console.debug(`[monitor] Daily limit exceeded for model ${model.displayName}`);
+        }
+
+        GM_setValue("usageData", usageData);
+        updateUI();
     }
-
-      const model = usageData.models[modelId];
-      model.count += 1;
-      model.lastUpdate = new Date().toLocaleTimeString();
-
-      if (model.dailyLimit > 0 && model.count > model.dailyLimit) {
-          console.debug(`[monitor] Daily limit exceeded for model ${model.displayName}`);
-      }
-
-      GM_setValue("usageData", usageData);
-      updateUI();
-  }
 
     // Daily Reset Check
     function checkAndResetDaily() {
