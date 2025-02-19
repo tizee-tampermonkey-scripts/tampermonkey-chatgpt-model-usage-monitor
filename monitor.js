@@ -5,7 +5,7 @@
 // @updateURL    https://raw.githubusercontent.com/tizee/tempermonkey-chatgpt-model-usage-monitor/main/monitor.js
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=chatgpt.com
 // @author       tizee
-// @version      1.3
+// @version      1.4
 // @description  Elegant usage monitor for ChatGPT models with daily quota tracking
 // @match        https://chatgpt.com/
 // @match        https://chatgpt.com/c/*
@@ -182,6 +182,8 @@
     color: ${COLORS.yellow};
   }
 
+
+
   #chatUsageMonitor .btn {
     padding: ${STYLE.spacing.sm} ${STYLE.spacing.md};
     border: none;
@@ -224,7 +226,7 @@
     background: ${COLORS.secondaryText};
   }
 
-  #chatUsageMonitor .progress-container {
+    #chatUsageMonitor .progress-container {
         width: 100%;
         background: ${COLORS.surface};
         margin-top: ${STYLE.spacing.xs};
@@ -248,69 +250,69 @@
         animation: gradientShift 2s linear infinite;
   }
 
-  #chatUsageMonitor .progress-bar.low-usage {
+ #chatUsageMonitor .progress-bar.low-usage {
         animation: pulse 1.5s ease-in-out infinite;
-  }
+    }
 
-  #chatUsageMonitor .progress-bar.exceeded {
-      background: ${COLORS.progressExceed};
-      animation: none;
-  }
+    #chatUsageMonitor .progress-bar.exceeded {
+        background: ${COLORS.progressExceed};
+        animation: none;
+    }
 
-  @keyframes gradientShift {
-      0% { background-position: 100% 0; }
-      100% { background-position: -100% 0; }
-  }
+    @keyframes gradientShift {
+        0% { background-position: 100% 0; }
+        100% { background-position: -100% 0; }
+    }
 
-  @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-      70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-  }
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+        70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
 
  /* Dot-based progression system */
-  #chatUsageMonitor .dot-progress {
-      display: flex;
-      gap: 4px;
-      align-items: center;
-      height: 8px;
-  }
+    #chatUsageMonitor .dot-progress {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+        height: 8px;
+    }
 
-  #chatUsageMonitor .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      transition: all 0.3s ease;
-  }
+    #chatUsageMonitor .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+    }
 
-  #chatUsageMonitor .dot-empty {
-      background: rgba(239, 68, 68, 0.3);
-      border: 1px solid ${COLORS.progressLow};
-  }
+    #chatUsageMonitor .dot-empty {
+        background: rgba(239, 68, 68, 0.3);
+        border: 1px solid ${COLORS.progressLow};
+    }
 
-  #chatUsageMonitor .dot-partial {
-      background: ${COLORS.progressMed};
-  }
+    #chatUsageMonitor .dot-partial {
+        background: ${COLORS.progressMed};
+    }
 
-  #chatUsageMonitor .dot-full {
-      background: ${COLORS.progressHigh};
-  }
+    #chatUsageMonitor .dot-full {
+        background: ${COLORS.progressHigh};
+    }
 
-  #chatUsageMonitor .dot-exceeded {
-      background: ${COLORS.progressExceed};
-      position: relative;
-  }
+    #chatUsageMonitor .dot-exceeded {
+        background: ${COLORS.progressExceed};
+        position: relative;
+    }
 
-  #chatUsageMonitor .dot-exceeded::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: -2px;
-      right: -2px;
-      height: 2px;
-      background: ${COLORS.surface};
-      transform: rotate(45deg);
-  }
+    #chatUsageMonitor .dot-exceeded::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: -2px;
+        right: -2px;
+        height: 2px;
+        background: ${COLORS.surface};
+        transform: rotate(45deg);
+    }
 
   #chatUsageMonitor .table-header {
     font-family: monospace;
@@ -321,30 +323,49 @@
     align-items: center;
     grid-template-columns: 2fr 1.5fr 1.5fr 2fr;
   }
-  #chatUsageMonitor .model-row {
-     font-family: monospace;
-     color: ${COLORS.secondaryText};
-     transition: color 0.2s ease;
-     font-size:  ${STYLE.textSize.xs};
-     line-height: ${STYLE.lineHeight.xs};
-     display : grid;
-     grid-template-columns: 2fr 1.5fr 1.5fr 2fr;
-     align-items: center;
-   }
-  #chatUsageMonitor .model-row:hover {
-     color: ${COLORS.yellow};
-     text-decoration-line: underline;
-     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+ #chatUsageMonitor .model-row {
+    font-family: monospace;
+    color: ${COLORS.secondaryText};
+    transition: color 0.2s ease;
+    font-size:  ${STYLE.textSize.xs};
+    line-height: ${STYLE.lineHeight.xs};
+    display : grid;
+    grid-template-columns: 2fr 1.5fr 1.5fr 2fr;
+    align-items: center;
   }
+  #chatUsageMonitor .model-row:hover {
+    color: ${COLORS.yellow};
+    text-decoration-line: underline;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
 `);
 
     // State Management
-    let usageData = GM_getValue("usageData", defaultUsageData);
-    if (!usageData.position) {
-        usageData.position = { x: null, y: null };
-        GM_setValue("usageData", usageData);
-    }
+    const Storage = {
+        key: "usageData",
 
+        get() {
+            let usageData = GM_getValue(this.key, defaultUsageData);
+            if (!usageData.position) {
+                usageData.position = { x: null, y: null };
+                this.set(usageData);
+            }
+            return usageData;
+        },
+
+        set(newData) {
+            GM_setValue(this.key, newData);
+        },
+
+        update(callback) {
+            const data = this.get();
+            callback(data);
+            this.set(data);
+        }
+    };
+
+    let usageData = Storage.get();
     // Component Functions
     function createModelRow(model, modelKey, isSettings = false) {
         const row = document.createElement("div");
@@ -475,7 +496,7 @@
     function handleDeleteModel(modelKey) {
         if (confirm(`Delete mapping for model "${modelKey}"?`)) {
             delete usageData.models[modelKey];
-            GM_setValue("usageData", usageData);
+            Storage.set(usageData);
             updateUI();
         }
     }
@@ -495,6 +516,7 @@
         container.innerHTML = "";
 
         // Title Section
+
         const subtitle = document.createElement("div");
         subtitle.textContent = `${getToday()}`;
         subtitle.style.fontSize = `${STYLE.textSize.xs}`;
@@ -585,7 +607,7 @@
                 lastUpdate: "",
             };
 
-            GM_setValue("usageData", usageData);
+            Storage.set(usageData);
             updateUI();
         });
         container.appendChild(addBtn);
@@ -624,7 +646,7 @@
             });
 
             if (hasChanges) {
-                GM_setValue("usageData", usageData);
+                Storage.set(usageData);
                 updateUI();
                 alert("Settings saved successfully.");
             } else {
@@ -636,7 +658,8 @@
 
     // Model Usage Tracking
     function incrementUsageForModel(modelId) {
-        // Ensure daily counts are reset if a new day has started.
+        // Ensure daily counts are reset if a new day has started using latest data usage.
+        usageData = Storage.get();
         checkAndResetDaily();
 
         if (!usageData.models[modelId]) {
@@ -659,7 +682,7 @@
             console.debug(`[monitor] Daily limit exceeded for model ${model.displayName}`);
         }
 
-        GM_setValue("usageData", usageData);
+        Storage.set(usageData);
         updateUI();
     }
 
@@ -671,7 +694,7 @@
                 model.lastUpdate = "";
             });
             usageData.lastReset = getToday();
-            GM_setValue("usageData", usageData);
+            Storage.set(usageData);
         }
     }
 
@@ -758,7 +781,7 @@
                 x: currentX,
                 y: currentY,
             };
-            GM_setValue("usageData", usageData);
+            Storage.set(usageData);
         }
 
         // Create header with icon tabs
@@ -815,6 +838,7 @@
         });
 
         document.body.appendChild(container);
+        console.debug("[monitor] create ui");
         updateUI();
     }
 
@@ -840,12 +864,12 @@
                     const bodyObj = JSON.parse(bodyText);
 
                     if (bodyObj?.model) {
-                        console.debug("Detected model usage:", bodyObj.model);
+                        console.debug("[monitor] Detected model usage:", bodyObj.model);
                         incrementUsageForModel(bodyObj.model);
                     }
                 }
             } catch (error) {
-                console.warn("Failed to process request:", error);
+                console.warn("[monitor] Failed to process request:", error);
             }
 
             return response;
