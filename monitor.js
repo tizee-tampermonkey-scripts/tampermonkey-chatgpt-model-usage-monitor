@@ -5,7 +5,7 @@
 // @updateURL    https://raw.githubusercontent.com/tizee/tempermonkey-chatgpt-model-usage-monitor/main/monitor.js
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=chatgpt.com
 // @author       tizee
-// @version      1.5
+// @version      1.6
 // @description  Elegant usage monitor for ChatGPT models with daily quota tracking
 // @match        https://chatgpt.com/
 // @match        https://chatgpt.com/c/*
@@ -75,6 +75,7 @@
     const defaultUsageData = {
         position: { x: null, y: null },
         lastReset: getToday(),
+        progressType: "dots", // dots or bar
         models: {
             "o3-mini": {
                 displayName: "o3-mini",
@@ -338,7 +339,39 @@
     text-decoration-line: underline;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   }
+  /* Container to help position the arrow (pseudo-element) */
+   #chatUsageMonitor .custom-select {
+      position: relative;
+      display: inline-block;
+    }
 
+  /* Hide the native select arrow and style the dropdown */
+   #chatUsageMonitor .custom-select select {
+      -webkit-appearance: none; /* Safari and Chrome */
+      -moz-appearance: none;    /* Firefox */
+      appearance: none;         /* Standard modern browsers */
+
+      background-color: transparent;
+      color: #ffffff;
+      border: none;
+      cursor: pointer;
+      color: ${COLORS.white};
+      font-size: ${STYLE.textSize.md};
+      line-height:  ${STYLE.lineHeight.md};
+    }
+    /* Style the list of options (when the dropdown is open) */
+    .custom-select select option {
+       background: ${COLORS.background};
+      color: ${COLORS.white};
+    }
+
+    /* Optional: highlight the hovered option in some browsers */
+    .custom-select select option:hover {
+      background: ${COLORS.background};
+     color: ${COLORS.yellow};
+    text-decoration-line: underline;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
 `);
 
     // State Management
@@ -347,10 +380,18 @@
 
         get() {
             let usageData = GM_getValue(this.key, defaultUsageData);
+            if (!usageData){
+                usageData = defaultUsageData;
+            };
             if (!usageData.position) {
                 usageData.position = { x: null, y: null };
                 this.set(usageData);
             }
+            if (!usageData.progressType) {
+                usageData.progressType = "dots";
+                this.set(usageData);
+            }
+            console.debug("[monitor] get usageData:", usageData);
             return usageData;
         },
 
@@ -403,8 +444,6 @@
         return row;
     }
 
-    // Add a configuration option for dot vs bar progress
-    const USE_DOT_PROGRESS = true; // Set to true to use dot-based progression
     function createUsageModelRow(model, modelKey) {
         const row = document.createElement("div");
         row.className = "model-row";
@@ -429,8 +468,8 @@
         const progressCell = document.createElement("div");
         if (model.dailyLimit > 0) {
             const usagePercent = model.count / model.dailyLimit;
-
-            if (USE_DOT_PROGRESS) {
+            console.debug("[monitor] progress type", usageData.progressType);
+            if (usageData.progressType == "dots") {
                 // Dot-based progress implementation
                 const dotContainer = document.createElement("div");
                 dotContainer.className = "dot-progress";
@@ -516,7 +555,6 @@
         container.innerHTML = "";
 
         // Title Section
-
         const subtitle = document.createElement("div");
         subtitle.textContent = `${getToday()}`;
         subtitle.style.fontSize = `${STYLE.textSize.xs}`;
@@ -586,6 +624,7 @@
             container.appendChild(row);
         });
 
+        // add new model
         const addBtn = document.createElement("button");
         addBtn.className = "btn";
         addBtn.textContent = "Add Model Mapping";
@@ -612,6 +651,7 @@
         });
         container.appendChild(addBtn);
 
+        // save model limits
         const saveBtn = document.createElement("button");
         saveBtn.className = "btn";
         saveBtn.textContent = "Save Settings";
@@ -654,6 +694,24 @@
             }
         });
         container.appendChild(saveBtn);
+
+        const selectContainer = document.createElement("div");
+        const progressTypeSelect = document.createElement("select");
+        selectContainer.className = "custom-select";
+        progressTypeSelect.innerHTML = `
+        <option value="dots" selected>dots</option>
+        <option value="bar">bar</option>
+        `;
+        progressTypeSelect.value = usageData.progressType || "dots";
+        progressTypeSelect.addEventListener('change', () => {
+            usageData.progressType = progressTypeSelect.value;
+            Storage.set(usageData);
+            updateUI();
+            console.debug('[monitor] progress type:', progressTypeSelect.value);
+        });
+        progressTypeSelect.style.marginLeft = STYLE.spacing.sm;
+        selectContainer.appendChild(progressTypeSelect);
+        container.appendChild(selectContainer);
     }
 
     // Model Usage Tracking
