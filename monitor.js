@@ -5,7 +5,7 @@
 // @updateURL    https://raw.githubusercontent.com/tizee/tempermonkey-chatgpt-model-usage-monitor/main/monitor.js
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=chatgpt.com
 // @author       tizee
-// @version      1.4
+// @version      1.5
 // @description  Elegant usage monitor for ChatGPT models with daily quota tracking
 // @match        https://chatgpt.com/
 // @match        https://chatgpt.com/c/*
@@ -698,6 +698,71 @@
         }
     }
 
+    class Draggable {
+        constructor(element) {
+            this.element = element;
+            this.isDragging = false;
+            this.initialX = 0;
+            this.initialY = 0;
+            this.boundHandleMove = this.handleMove.bind(this);
+            this.boundHandleEnd = this.handleEnd.bind(this);
+            this.init();
+        }
+
+        init() {
+            const handle = this.element.querySelector('.drag-handle');
+            handle.addEventListener('mousedown', this.handleStart.bind(this));
+        }
+
+        handleStart(e) {
+            this.isDragging = true;
+            this.initialX = e.clientX - this.element.offsetLeft;
+            this.initialY = e.clientY - this.element.offsetTop;
+
+            document.addEventListener('mousemove', this.boundHandleMove);
+            document.addEventListener('mouseup', this.boundHandleEnd);
+            requestAnimationFrame(() => this.updatePosition());
+        }
+
+        handleMove(e) {
+            if (!this.isDragging) return;
+
+            this.currentX = e.clientX - this.initialX;
+            this.currentY = e.clientY - this.initialY;
+            this.applyBoundaryConstraints();
+        }
+
+        applyBoundaryConstraints() {
+            const rect = this.element.getBoundingClientRect();
+            const maxX = window.innerWidth - rect.width;
+            const maxY = window.innerHeight - rect.height;
+
+            this.currentX = Math.min(Math.max(0, this.currentX), maxX);
+            this.currentY = Math.min(Math.max(0, this.currentY), maxY);
+        }
+
+        updatePosition() {
+            if (!this.isDragging) return;
+
+            this.element.style.left = `${this.currentX}px`;
+            this.element.style.top = `${this.currentY}px`;
+            requestAnimationFrame(() => this.updatePosition());
+        }
+
+        handleEnd() {
+            this.isDragging = false;
+            document.removeEventListener('mousemove', this.boundHandleMove);
+            document.removeEventListener('mouseup', this.boundHandleEnd);
+
+            Storage.update(data => {
+                data.position = {
+                    x: this.currentX,
+                    y: this.currentY
+                };
+            });
+        }
+    }
+    let draggable;
     // UI Creation
     function createMonitorUI() {
         if (document.getElementById("chatUsageMonitor")) return;
@@ -707,11 +772,12 @@
 
         // Make container draggable
         container.style.cursor = "move";
-        let isDragging = false;
-        let currentX;
-        let currentY;
-        let initialX;
-        let initialY;
+
+        // Create header with icon tabs
+        const header = document.createElement("header");
+        const dragHandle = document.createElement("div");
+        dragHandle.className = "drag-handle";
+        header.appendChild(dragHandle);
 
         // Set initial position
         if (usageData.position.x !== null && usageData.position.y !== null) {
@@ -735,66 +801,6 @@
             container.style.left = "auto";
             container.style.top = "auto";
         }
-
-        function handleDragStart(e) {
-            if (!e.target.classList.contains("drag-handle")) return;
-
-            isDragging = true;
-
-            if (container.style.right !== "auto") {
-                const rect = container.getBoundingClientRect();
-                container.style.right = "auto";
-                container.style.bottom = "auto";
-                container.style.left = `${rect.left}px`;
-                container.style.top = `${rect.top}px`;
-            }
-
-            initialX = e.clientX - container.offsetLeft;
-            initialY = e.clientY - container.offsetTop;
-        }
-
-
-        function handleDrag(e) {
-            if (!isDragging) return;
-
-            e.preventDefault();
-            currentX = e.clientX - initialX;
-            currentY = e.clientY - initialY;
-
-            // Ensure the container stays within viewport
-            const maxX = window.innerWidth - container.offsetWidth;
-            const maxY = window.innerHeight - container.offsetHeight;
-
-            currentX = Math.min(Math.max(0, currentX), maxX);
-            currentY = Math.min(Math.max(0, currentY), maxY);
-
-            container.style.left = `${currentX}px`;
-            container.style.top = `${currentY}px`;
-        }
-
-        function handleDragEnd() {
-            if (!isDragging) return;
-
-            isDragging = false;
-            // Save the final position
-            usageData.position = {
-                x: currentX,
-                y: currentY,
-            };
-            Storage.set(usageData);
-        }
-
-        // Create header with icon tabs
-        const header = document.createElement("header");
-
-        const dragHandle = document.createElement("div");
-        dragHandle.className = "drag-handle";
-        header.appendChild(dragHandle);
-
-        // Add drag event listeners
-        dragHandle.addEventListener("mousedown", handleDragStart);
-        document.addEventListener("mousemove", handleDrag);
-        document.addEventListener("mouseup", handleDragEnd);
 
         const usageTabBtn = document.createElement("button");
         usageTabBtn.innerHTML = `<span>Usage</span>`;
@@ -838,7 +844,9 @@
         });
 
         document.body.appendChild(container);
+        draggable = new Draggable(container);
         console.debug("[monitor] create ui");
+        console.debug("[monitor] draggable", draggable);
         updateUI();
     }
 
