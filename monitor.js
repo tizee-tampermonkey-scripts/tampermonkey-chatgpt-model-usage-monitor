@@ -5,7 +5,7 @@
 // @updateURL    https://raw.githubusercontent.com/tizee/tempermonkey-chatgpt-model-usage-monitor/main/monitor.js
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=chatgpt.com
 // @author       tizee
-// @version      1.7
+// @version      1.8
 // @description  Elegant usage monitor for ChatGPT models with daily quota tracking
 // @match        https://chatgpt.com/
 // @match        https://chatgpt.com/c/*
@@ -19,287 +19,11 @@
 
 (function () {
     "use strict";
-    /**
- * A reusable class that applies a "text evolution" / "glitch" animation to an element's text.
- */
-    class TextEvolutionAnimator {
-        static GLITCH_CHARACTERS = "—~±§|[].+$^@*()•x%!?#";
+    // text-scramble animation
+     (()=>{var TextScrambler=(()=>{var l=Object.defineProperty;var c=Object.getOwnPropertyDescriptor;var u=Object.getOwnPropertyNames;var m=Object.prototype.hasOwnProperty;var d=(n,t)=>{for(var e in t)l(n,e,{get:t[e],enumerable:!0})},f=(n,t,e,s)=>{if(t&&typeof t=="object"||typeof t=="function")for(let i of u(t))!m.call(n,i)&&i!==e&&l(n,i,{get:()=>t[i],enumerable:!(s=c(t,i))||s.enumerable});return n};var g=n=>f(l({},"__esModule",{value:!0}),n);var T={};d(T,{default:()=>r});function _(n){let t=document.createTreeWalker(n,NodeFilter.SHOW_TEXT,{acceptNode:s=>s.nodeValue.trim()?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_SKIP}),e=[];for(;t.nextNode();)t.currentNode.nodeValue=t.currentNode.nodeValue.replace(/(\n|\r|\t)/gm,""),e.push(t.currentNode);return e}function p(n,t,e){return t<0||t>=n.length?n:n.substring(0,t)+e+n.substring(t+1)}function M(n,t){return n?"x":t[Math.floor(Math.random()*t.length)]}var r=class{constructor(t,e={}){this.el=t;let s={duration:1e3,delay:0,reverse:!1,absolute:!1,pointerEvents:!0,scrambleSymbols:"\u2014~\xB1\xA7|[].+$^@*()\u2022x%!?#",randomThreshold:null};this.config=Object.assign({},s,e),this.config.randomThreshold===null&&(this.config.randomThreshold=this.config.reverse?.1:.8),this.textNodes=_(this.el),this.nodeLengths=this.textNodes.map(i=>i.nodeValue.length),this.originalText=this.textNodes.map(i=>i.nodeValue).join(""),this.mask=this.originalText.split(" ").map(i=>"\xA0".repeat(i.length)).join(" "),this.currentMask=this.mask,this.totalChars=this.originalText.length,this.scrambleRange=Math.floor(this.totalChars*(this.config.reverse?.25:1.5)),this.direction=this.config.reverse?-1:1,this.config.absolute&&(this.el.style.position="absolute",this.el.style.top="0"),this.config.pointerEvents||(this.el.style.pointerEvents="none"),this._animationFrame=null,this._startTime=null,this._running=!1}initialize(){return this.currentMask=this.mask,this}_getEased(t){let e=-(Math.cos(Math.PI*t)-1)/2;return e=Math.pow(e,2),this.config.reverse?1-e:e}_updateScramble(t,e,s){if(Math.random()<.5&&t>0&&t<1)for(let i=0;i<20;i++){let o=i/20,a;if(this.config.reverse?a=e-Math.floor((1-Math.random())*this.scrambleRange*o):a=e+Math.floor((1-Math.random())*this.scrambleRange*o),!(a<0||a>=this.totalChars)&&this.currentMask[a]!==" "){let h=Math.random()>this.config.randomThreshold?this.originalText[a]:M(this.config.reverse,this.config.scrambleSymbols);this.currentMask=p(this.currentMask,a,h)}}}_composeOutput(t,e,s){let i="";if(this.config.reverse){let o=Math.max(e-s,0);i=this.mask.slice(0,o)+this.currentMask.slice(o,e)+this.originalText.slice(e)}else i=this.originalText.slice(0,e)+this.currentMask.slice(e,e+s)+this.mask.slice(e+s);return i}_updateTextNodes(t){let e=0;for(let s=0;s<this.textNodes.length;s++){let i=this.nodeLengths[s];this.textNodes[s].nodeValue=t.slice(e,e+i),e+=i}}_tick=t=>{this._startTime||(this._startTime=t);let e=t-this._startTime,s=Math.min(e/this.config.duration,1),i=this._getEased(s),o=Math.floor(this.totalChars*s),a=Math.floor(2*(.5-Math.abs(s-.5))*this.scrambleRange);this._updateScramble(s,o,a);let h=this._composeOutput(s,o,a);this._updateTextNodes(h),s<1?this._animationFrame=requestAnimationFrame(this._tick):this._running=!1};start(){this._running=!0,this._startTime=null,this.config.delay?setTimeout(()=>{this._animationFrame=requestAnimationFrame(this._tick)},this.config.delay):this._animationFrame=requestAnimationFrame(this._tick)}stop(){this._animationFrame&&(cancelAnimationFrame(this._animationFrame),this._animationFrame=null),this._running=!1}};return g(T);})();
+window.TextScrambler = TextScrambler.default || TextScrambler;
+     })();
 
-        /**
-   * Creates a new TextEvolutionAnimator.
-   *
-   * @param {HTMLElement} element – The DOM element containing the text to animate.
-   * @param {Object} [options={}]
-   * @param {number} [options.duration=1000] – Total animation time in ms.
-   * @param {number} [options.delay=0] – Milliseconds to wait before starting.
-   * @param {boolean} [options.reverse=false] – If true, animate from normal text to glitch, rather than glitch to normal.
-   * @param {boolean} [options.absolute=false] – If true, sets element.style.position to "absolute".
-   * @param {boolean} [options.pointerEvents=true] – If false, disables pointer events on the element.
-   */
-        constructor(
-        element,
-         {
-            duration = 1000,
-            delay = 0,
-            reverse = false,
-            absolute = false,
-            pointerEvents = true
-        } = {}
-        ) {
-            this.element = element;
-            this.duration = duration;
-            this.delay = delay;
-            this.reverse = reverse;
-            this.absolute = absolute;
-            this.pointerEvents = pointerEvents;
-
-            // Internal fields to be set by initialize():
-            this.textNodes = [];
-            this.originalNodeLengths = [];
-            this.fullText = "";
-            this.placeholders = "";
-            this.currentGlitchText = "";
-            this.requestId = null;       // for requestAnimationFrame
-            this.startTime = null;       // track when the animation starts
-            this.running = false;        // track whether we’re animating
-        }
-
-        /**
-   * Gathers and stores the element's text node structure, the final text,
-   * plus placeholders for glitch effect. Must be called before start().
-   */
-        initialize() {
-            // If needed, style tweaks:
-            if (this.absolute) {
-                this.element.style.position = "absolute";
-                this.element.style.top = "0";
-            }
-            if (!this.pointerEvents) {
-                this.element.style.pointerEvents = "none";
-            }
-
-            // Gather all text nodes in this.element:
-            this.textNodes = this._collectTextNodes(this.element);
-
-            // Record lengths and build final text string:
-            this.originalNodeLengths = this.textNodes.map(node => node.nodeValue.length);
-            this.fullText = this.textNodes.map(node => node.nodeValue).join("");
-
-            // Create placeholders: same word structure, but with non-breaking spaces
-            this.placeholders = this.fullText
-                .split(" ")
-                .map(word => "\u00A0".repeat(word.length))
-                .join(" ");
-
-            // We start from placeholders if not reversed. If reversed, start from final text.
-            this.currentGlitchText = this.reverse ? this.fullText : this.placeholders;
-        }
-
-        /**
-   * Starts the animation. Internally calls requestAnimationFrame,
-   * and uses this.tick(progress) each frame.
-   */
-        start() {
-            this.running = true;
-            this.startTime = performance.now() + this.delay;
-
-            const animate = now => {
-                // Possibly check if we have canceled or finalized:
-                if (!this.running) return;
-
-                // If we have not reached the official start time, keep waiting
-                if (now < this.startTime) {
-                    this.requestId = requestAnimationFrame(animate);
-                    return;
-                }
-
-                // Compute how far along we are in [0..1]
-                const elapsed = now - this.startTime;
-                let progress = elapsed / this.duration;
-                if (progress > 1) progress = 1;
-
-                // Update the text state
-                this.tick(progress);
-
-                // If we haven't reached 1.0, keep animating
-                if (progress < 1) {
-                    this.requestId = requestAnimationFrame(animate);
-                } else {
-                    // By default, finalize automatically
-                    this.finalize();
-                }
-            };
-
-            this.requestId = requestAnimationFrame(animate);
-        }
-
-        /**
-   * Applies the glitch transformation for a given progress [0..1].
-   * If you do manual stepping of the animation, you can call tick() yourself.
-   *
-   * @param {number} progress – A number from 0.0 up to 1.0
-   */
-        tick(progress) {
-            // Standard easeInOut squared easing.
-            let eased = (1 - Math.cos(Math.PI * progress)) / 2;
-            eased = Math.pow(eased, 2);
-
-            const n = this.fullText.length;
-
-            if (this.reverse) {
-                // In reverse mode, we want the text to vanish from the beginning.
-                // Invert eased so that at progress=0 the entire text is correct,
-                // and at progress=1 none is correct.
-                const effectiveEased = 1 - eased;
-                // "Correct" text is taken from the tail.
-                const correctCount = Math.floor(n * effectiveEased);
-                // Compute indices relative to the tail.
-                const startCorrectIndex = n - correctCount;
-                // Use a smaller glitch frame in reverse mode.
-                const glitchFrameCount = Math.floor(n * 0.25);
-                const glitchProbability = 0.1;
-                const glitchRunLength = Math.floor(
-                    2 * (0.5 - Math.abs(effectiveEased - 0.5)) * glitchFrameCount
-                );
-                const glitchStart = Math.max(startCorrectIndex - glitchRunLength, 0);
-
-                // Occasionally update some random positions (in the left portion) with a glitch character.
-                if (Math.random() < 0.5 && progress < 1 && progress !== 0) {
-                    for (let j = 0; j < 20; j++) {
-                        const fraction = j / 20;
-                        // Work from the beginning (index 0) toward startCorrectIndex.
-                        let glitchIndex = startCorrectIndex - Math.floor((1 - Math.random()) * glitchFrameCount * fraction);
-                        if (glitchIndex < 0) glitchIndex = 0;
-                        if (glitchIndex >= this.currentGlitchText.length)
-                        {
-                            glitchIndex = this.currentGlitchText.length - 1;
-                        }
-                        const charAtIndex = this.currentGlitchText[glitchIndex];
-                        if (charAtIndex !== " ") {
-                            this.currentGlitchText = this._replaceCharacter(
-                                this.currentGlitchText,
-                                glitchIndex,
-                                Math.random() > glitchProbability
-                                ? this.fullText[glitchIndex]
-                                : this._randomGlitchChar()
-                            );
-                        }
-                    }
-                }
-
-                // Build the display:
-                // 1. From index 0 to glitchStart, use placeholders.
-                // 2. From glitchStart to startCorrectIndex, use (possibly glitched) text.
-                // 3. From startCorrectIndex to the end, show the final text.
-                let display =
-                    this.placeholders.slice(0, glitchStart) +
-                    this.currentGlitchText.slice(glitchStart, startCorrectIndex) +
-                    this.fullText.slice(startCorrectIndex);
-
-                // Update the text nodes.
-                let offset = 0;
-                this.textNodes.forEach((node, i) => {
-                    node.nodeValue = display.slice(offset, offset + this.originalNodeLengths[i]);
-                    offset += this.originalNodeLengths[i];
-                });
-            } else {
-                // Non-reverse: animate from placeholders to final text (left to right).
-                const correctCount = Math.floor(n * eased);
-                const glitchFrameCount = Math.floor(n * 1.5);
-                const glitchProbability = 0.8;
-                const glitchRunLength = Math.floor(
-                    2 * (0.5 - Math.abs(eased - 0.5)) * glitchFrameCount
-                );
-
-                if (Math.random() < 0.5 && progress < 1 && progress !== 0) {
-                    for (let j = 0; j < 20; j++) {
-                        const fraction = j / 20;
-                        let glitchIndex = correctCount + Math.floor((1 - Math.random()) * glitchFrameCount * fraction);
-                        if (glitchIndex < 0) glitchIndex = 0;
-                        if (glitchIndex >= this.currentGlitchText.length){
-                            glitchIndex = this.currentGlitchText.length - 1;
-                        }
-                        const charAtIndex = this.currentGlitchText[glitchIndex];
-                        if (charAtIndex !== " ") {
-                            this.currentGlitchText = this._replaceCharacter(
-                                this.currentGlitchText,
-                                glitchIndex,
-                                Math.random() > glitchProbability
-                                ? this.fullText[glitchIndex]
-                                : this._randomGlitchChar()
-                            );
-                        }
-                    }
-                }
-
-                let display =
-                    this.fullText.slice(0, correctCount) +
-                    this.currentGlitchText.slice(correctCount, correctCount + glitchRunLength) +
-                    this.placeholders.slice(correctCount + glitchRunLength);
-
-                let offset = 0;
-                this.textNodes.forEach((node, i) => {
-                    node.nodeValue = display.slice(offset, offset + this.originalNodeLengths[i]);
-                    offset += this.originalNodeLengths[i];
-                });
-            }
-        }
-
-        /**
-   * Immediately ends the animation, restoring the "final" text (or placeholders if reversed).
-   */
-        finalize() {
-            this.running = false;
-            if (this.requestId) {
-                cancelAnimationFrame(this.requestId);
-                this.requestId = null;
-            }
-            // Force the final text state
-            const final = this.reverse ? this.placeholders : this.fullText;
-            let offset = 0;
-            this.textNodes.forEach((node, i) => {
-                node.nodeValue = final.slice(offset, offset + this.originalNodeLengths[i]);
-                offset += this.originalNodeLengths[i];
-            });
-        }
-
-        // ----------------- private helpers ------------------
-
-        /**
-   * Recursively collects text nodes from the given element.
-   */
-        _collectTextNodes(el) {
-            const nodes = [];
-            el.childNodes.forEach(child => {
-                if (child.nodeType === Node.TEXT_NODE) {
-                    const trimmed = child.nodeValue.replace(/(\n|\r|\t)/gm, "");
-                    if (trimmed.length > 0) {
-                        child.nodeValue = trimmed;
-                        nodes.push(child);
-                    }
-                } else {
-                    nodes.push(...this._collectTextNodes(child));
-                }
-            });
-            return nodes;
-        }
-
-        /**
-   * Replaces a single character in a string at the given index.
-   */
-        _replaceCharacter(str, index, newChar) {
-            if (index < 0 || index >= str.length) return str;
-            return str.substring(0, index) + newChar + str.substring(index + 1);
-        }
-
-        /**
-   * Picks one random "glitch" character.
-   */
-        _randomGlitchChar() {
-            const pool = TextEvolutionAnimator.GLITCH_CHARACTERS;
-            return pool[Math.floor(Math.random() * pool.length)];
-        }
-    }
 
     // Constants and Configuration
     const COLORS = {
@@ -823,7 +547,7 @@
 
     function animateText(el, config)
     {
-        const animator = new TextEvolutionAnimator(el, {...config});
+        const animator = new TextScrambler(el, {...config});
         animator.initialize();
         animator.start();
     }
@@ -836,13 +560,13 @@
         if (usageContent) {
             console.debug("[monitor] update usage");
             updateUsageContent(usageContent);
-            animateText(usageContent, { duration: 2000, delay: 0, reverse: false, absolute: false, pointerEvents: true });
+            animateText(usageContent, { duration: 500, delay: 0, reverse: false, absolute: false, pointerEvents: true });
         }
 
         if (settingsContent) {
             console.debug("[monitor] update setting");
             updateSettingsContent(settingsContent);
-            animateText(settingsContent, { duration: 2000, delay: 0, reverse: false, absolute: false, pointerEvents: true });
+            animateText(settingsContent, { duration: 500, delay: 0, reverse: false, absolute: false, pointerEvents: true });
         }
 
     }
@@ -1012,15 +736,15 @@
         container.appendChild(selectContainer);
     }
 
-    // Model Usage Tracking
-    function incrementUsageForModel(modelId) {
-        // Ensure daily counts are reset if a new day has started using latest data usage.
-        usageData = Storage.get();
-        checkAndResetDaily();
+// Model Usage Tracking
+function incrementUsageForModel(modelId) {
+    // Ensure daily counts are reset if a new day has started using latest data usage.
+    usageData = Storage.get();
+    checkAndResetDaily();
 
-        if (!usageData.models[modelId]) {
-            console.debug(
-                `[monitor] No mapping found for model "${modelId}". Creating new entry.`
+    if (!usageData.models[modelId]) {
+        console.debug(
+            `[monitor] No mapping found for model "${modelId}". Creating new entry.`
       );
             usageData.models[modelId] = {
                 displayName: modelId,
@@ -1042,229 +766,229 @@
         updateUI();
     }
 
-    // Daily Reset Check
-    function checkAndResetDaily() {
-        if (usageData.lastReset !== getToday()) {
-            Object.values(usageData.models).forEach((model) => {
-                model.count = 0;
-                model.lastUpdate = "";
-            });
-            usageData.lastReset = getToday();
-            Storage.set(usageData);
-        }
+// Daily Reset Check
+function checkAndResetDaily() {
+    if (usageData.lastReset !== getToday()) {
+        Object.values(usageData.models).forEach((model) => {
+            model.count = 0;
+            model.lastUpdate = "";
+        });
+        usageData.lastReset = getToday();
+        Storage.set(usageData);
+    }
+}
+
+class Draggable {
+    constructor(element) {
+        this.element = element;
+        this.isDragging = false;
+        this.initialX = 0;
+        this.initialY = 0;
+        this.boundHandleMove = this.handleMove.bind(this);
+        this.boundHandleEnd = this.handleEnd.bind(this);
+        this.init();
     }
 
-    class Draggable {
-        constructor(element) {
-            this.element = element;
-            this.isDragging = false;
-            this.initialX = 0;
-            this.initialY = 0;
-            this.boundHandleMove = this.handleMove.bind(this);
-            this.boundHandleEnd = this.handleEnd.bind(this);
-            this.init();
-        }
-
-        init() {
-            const handle = this.element.querySelector('.drag-handle');
-            handle.addEventListener('mousedown', this.handleStart.bind(this));
-        }
-
-        handleStart(e) {
-            this.isDragging = true;
-            this.initialX = e.clientX - this.element.offsetLeft;
-            this.initialY = e.clientY - this.element.offsetTop;
-
-            document.addEventListener('mousemove', this.boundHandleMove);
-            document.addEventListener('mouseup', this.boundHandleEnd);
-            requestAnimationFrame(() => this.updatePosition());
-        }
-
-        handleMove(e) {
-            if (!this.isDragging) return;
-
-            this.currentX = e.clientX - this.initialX;
-            this.currentY = e.clientY - this.initialY;
-            this.applyBoundaryConstraints();
-        }
-
-        applyBoundaryConstraints() {
-            const rect = this.element.getBoundingClientRect();
-            const maxX = window.innerWidth - rect.width;
-            const maxY = window.innerHeight - rect.height;
-
-            this.currentX = Math.min(Math.max(0, this.currentX), maxX);
-            this.currentY = Math.min(Math.max(0, this.currentY), maxY);
-        }
-
-        updatePosition() {
-            if (!this.isDragging) return;
-
-            this.element.style.left = `${this.currentX}px`;
-            this.element.style.top = `${this.currentY}px`;
-            requestAnimationFrame(() => this.updatePosition());
-        }
-
-        handleEnd() {
-            this.isDragging = false;
-            document.removeEventListener('mousemove', this.boundHandleMove);
-            document.removeEventListener('mouseup', this.boundHandleEnd);
-
-            Storage.update(data => {
-                data.position = {
-                    x: this.currentX,
-                    y: this.currentY
-                };
-            });
-        }
+    init() {
+        const handle = this.element.querySelector('.drag-handle');
+        handle.addEventListener('mousedown', this.handleStart.bind(this));
     }
-    let draggable;
-    // UI Creation
-    function createMonitorUI() {
-        if (document.getElementById("chatUsageMonitor")) return;
 
-        const container = document.createElement("div");
-        container.id = "chatUsageMonitor";
+    handleStart(e) {
+        this.isDragging = true;
+        this.initialX = e.clientX - this.element.offsetLeft;
+        this.initialY = e.clientY - this.element.offsetTop;
 
-        // Make container draggable
-        container.style.cursor = "move";
+        document.addEventListener('mousemove', this.boundHandleMove);
+        document.addEventListener('mouseup', this.boundHandleEnd);
+        requestAnimationFrame(() => this.updatePosition());
+    }
 
-        // Create header with icon tabs
-        const header = document.createElement("header");
-        const dragHandle = document.createElement("div");
-        dragHandle.className = "drag-handle";
-        header.appendChild(dragHandle);
+    handleMove(e) {
+        if (!this.isDragging) return;
 
-        // Set initial position
-        if (usageData.position.x !== null && usageData.position.y !== null) {
-            // Ensure position is within viewport
-            const maxX = window.innerWidth - 360; // container width
-            const maxY = window.innerHeight - 500; // container max-height
-            container.style.right = "auto";
-            container.style.bottom = "auto";
-            container.style.left = `${Math.min(
-                Math.max(0, usageData.position.x),
-                maxX
-            )}px`;
-            container.style.top = `${Math.min(
-                Math.max(0, usageData.position.y),
-                maxY
-            )}px`;
-        } else {
-            // bottom-right by default
-            container.style.right = STYLE.spacing.lg;
-            container.style.bottom = STYLE.spacing.lg;
-            container.style.left = "auto";
-            container.style.top = "auto";
-        }
+        this.currentX = e.clientX - this.initialX;
+        this.currentY = e.clientY - this.initialY;
+        this.applyBoundaryConstraints();
+    }
 
-        const usageTabBtn = document.createElement("button");
-        usageTabBtn.innerHTML = `<span>Usage</span>`;
+    applyBoundaryConstraints() {
+        const rect = this.element.getBoundingClientRect();
+        const maxX = window.innerWidth - rect.width;
+        const maxY = window.innerHeight - rect.height;
+
+        this.currentX = Math.min(Math.max(0, this.currentX), maxX);
+        this.currentY = Math.min(Math.max(0, this.currentY), maxY);
+    }
+
+    updatePosition() {
+        if (!this.isDragging) return;
+
+        this.element.style.left = `${this.currentX}px`;
+        this.element.style.top = `${this.currentY}px`;
+        requestAnimationFrame(() => this.updatePosition());
+    }
+
+    handleEnd() {
+        this.isDragging = false;
+        document.removeEventListener('mousemove', this.boundHandleMove);
+        document.removeEventListener('mouseup', this.boundHandleEnd);
+
+        Storage.update(data => {
+            data.position = {
+                x: this.currentX,
+                y: this.currentY
+            };
+        });
+    }
+}
+let draggable;
+// UI Creation
+function createMonitorUI() {
+    if (document.getElementById("chatUsageMonitor")) return;
+
+    const container = document.createElement("div");
+    container.id = "chatUsageMonitor";
+
+    // Make container draggable
+    container.style.cursor = "move";
+
+    // Create header with icon tabs
+    const header = document.createElement("header");
+    const dragHandle = document.createElement("div");
+    dragHandle.className = "drag-handle";
+    header.appendChild(dragHandle);
+
+    // Set initial position
+    if (usageData.position.x !== null && usageData.position.y !== null) {
+        // Ensure position is within viewport
+        const maxX = window.innerWidth - 360; // container width
+        const maxY = window.innerHeight - 500; // container max-height
+        container.style.right = "auto";
+        container.style.bottom = "auto";
+        container.style.left = `${Math.min(
+            Math.max(0, usageData.position.x),
+            maxX
+        )}px`;
+        container.style.top = `${Math.min(
+            Math.max(0, usageData.position.y),
+            maxY
+        )}px`;
+    } else {
+        // bottom-right by default
+        container.style.right = STYLE.spacing.lg;
+        container.style.bottom = STYLE.spacing.lg;
+        container.style.left = "auto";
+        container.style.top = "auto";
+    }
+
+    const usageTabBtn = document.createElement("button");
+    usageTabBtn.innerHTML = `<span>Usage</span>`;
+    usageTabBtn.classList.add("active");
+
+    const settingsTabBtn = document.createElement("button");
+    settingsTabBtn.innerHTML = `<span>Settings</span>`;
+
+    header.appendChild(usageTabBtn);
+    header.appendChild(settingsTabBtn);
+    container.appendChild(header);
+
+    container.style.cursor = "default";
+
+
+    // Create content panels
+    const usageContent = document.createElement("div");
+    usageContent.className = "content";
+    usageContent.id = "usageContent";
+    container.appendChild(usageContent);
+
+    const settingsContent = document.createElement("div");
+    settingsContent.className = "content";
+    settingsContent.id = "settingsContent";
+    settingsContent.style.display = "none";
+    container.appendChild(settingsContent);
+
+    // Add tab switching logic
+    usageTabBtn.addEventListener("click", () => {
         usageTabBtn.classList.add("active");
-
-        const settingsTabBtn = document.createElement("button");
-        settingsTabBtn.innerHTML = `<span>Settings</span>`;
-
-        header.appendChild(usageTabBtn);
-        header.appendChild(settingsTabBtn);
-        container.appendChild(header);
-
-        container.style.cursor = "default";
-
-
-        // Create content panels
-        const usageContent = document.createElement("div");
-        usageContent.className = "content";
-        usageContent.id = "usageContent";
-        container.appendChild(usageContent);
-
-        const settingsContent = document.createElement("div");
-        settingsContent.className = "content";
-        settingsContent.id = "settingsContent";
+        settingsTabBtn.classList.remove("active");
+        usageContent.style.display = "";
         settingsContent.style.display = "none";
-        container.appendChild(settingsContent);
-
-        // Add tab switching logic
-        usageTabBtn.addEventListener("click", () => {
-            usageTabBtn.classList.add("active");
-            settingsTabBtn.classList.remove("active");
-            usageContent.style.display = "";
-            settingsContent.style.display = "none";
-        });
-
-        settingsTabBtn.addEventListener("click", () => {
-            settingsTabBtn.classList.add("active");
-            usageTabBtn.classList.remove("active");
-            settingsContent.style.display = "";
-            usageContent.style.display = "none";
-        });
-
-        document.body.appendChild(container);
-        draggable = new Draggable(container);
-        console.debug("[monitor] create ui");
-        console.debug("[monitor] draggable", draggable);
-        updateUI();
-    }
-
-    // Fetch Interception
-    const target_window =
-          typeof unsafeWindow === "undefined" ? window : unsafeWindow;
-    const originalFetch = target_window.fetch;
-
-    target_window.fetch = new Proxy(originalFetch, {
-        apply: async function (target, thisArg, args) {
-            const response = await target.apply(thisArg, args);
-
-            try {
-                const [requestInfo, requestInit] = args;
-                const fetchUrl =
-                      typeof requestInfo === "string" ? requestInfo : requestInfo?.href;
-
-                if (
-                    requestInit?.method === "POST" &&
-                    fetchUrl?.endsWith("/conversation")
-                ) {
-                    const bodyText = requestInit.body;
-                    const bodyObj = JSON.parse(bodyText);
-
-                    if (bodyObj?.model) {
-                        console.debug("[monitor] Detected model usage:", bodyObj.model);
-                        incrementUsageForModel(bodyObj.model);
-                    }
-                }
-            } catch (error) {
-                console.warn("[monitor] Failed to process request:", error);
-            }
-
-            return response;
-        },
     });
 
-    // Initialization
-    function initialize() {
-        checkAndResetDaily();
-        createMonitorUI();
-    }
+    settingsTabBtn.addEventListener("click", () => {
+        settingsTabBtn.classList.add("active");
+        usageTabBtn.classList.remove("active");
+        settingsContent.style.display = "";
+        usageContent.style.display = "none";
+    });
 
-    // Setup Observers and Event Listeners
-    if (document.readyState === "loading") {
-        target_window.addEventListener("DOMContentLoaded", initialize);
-    } else {
+    document.body.appendChild(container);
+    draggable = new Draggable(container);
+    console.debug("[monitor] create ui");
+    console.debug("[monitor] draggable", draggable);
+    updateUI();
+}
+
+// Fetch Interception
+const target_window =
+      typeof unsafeWindow === "undefined" ? window : unsafeWindow;
+const originalFetch = target_window.fetch;
+
+target_window.fetch = new Proxy(originalFetch, {
+    apply: async function (target, thisArg, args) {
+        const response = await target.apply(thisArg, args);
+
+        try {
+            const [requestInfo, requestInit] = args;
+            const fetchUrl =
+                  typeof requestInfo === "string" ? requestInfo : requestInfo?.href;
+
+            if (
+                requestInit?.method === "POST" &&
+                fetchUrl?.endsWith("/conversation")
+            ) {
+                const bodyText = requestInit.body;
+                const bodyObj = JSON.parse(bodyText);
+
+                if (bodyObj?.model) {
+                    console.debug("[monitor] Detected model usage:", bodyObj.model);
+                    incrementUsageForModel(bodyObj.model);
+                }
+            }
+        } catch (error) {
+            console.warn("[monitor] Failed to process request:", error);
+        }
+
+        return response;
+    },
+});
+
+// Initialization
+function initialize() {
+    checkAndResetDaily();
+    createMonitorUI();
+}
+
+// Setup Observers and Event Listeners
+if (document.readyState === "loading") {
+    target_window.addEventListener("DOMContentLoaded", initialize);
+} else {
+    initialize();
+}
+
+// Observer for dynamic content changes
+const observer = new MutationObserver(() => {
+    if (!document.getElementById("chatUsageMonitor")) {
         initialize();
     }
+});
 
-    // Observer for dynamic content changes
-    const observer = new MutationObserver(() => {
-        if (!document.getElementById("chatUsageMonitor")) {
-            initialize();
-        }
-    });
+observer.observe(document.documentElement || document.body, {
+    childList: true,
+    subtree: true,
+});
 
-    observer.observe(document.documentElement || document.body, {
-        childList: true,
-        subtree: true,
-    });
-
-    // Handle navigation events
-    window.addEventListener("popstate", initialize);
+// Handle navigation events
+window.addEventListener("popstate", initialize);
 })();
