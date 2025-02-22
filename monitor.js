@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name         ChatGPT Model Usage Monitor
-// @namespace    https://github.com/tizee/tempermonkey-chatgpt-model-usage-monitor
-// @downloadURL  https://raw.githubusercontent.com/tizee/tempermonkey-chatgpt-model-usage-monitor/main/monitor.js
-// @updateURL    https://raw.githubusercontent.com/tizee/tempermonkey-chatgpt-model-usage-monitor/main/monitor.js
+// @namespace    https://github.com/tizee/tampermonkey-chatgpt-model-usage-monitor
+// @downloadURL  https://raw.githubusercontent.com/tizee/tampermonkey-chatgpt-model-usage-monitor/main/monitor.js
+// @updateURL    https://raw.githubusercontent.com/tizee/tampermonkey-chatgpt-model-usage-monitor/main/monitor.js
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=chatgpt.com
 // @author       tizee
-// @version      1.8
+// @version      1.8.1
 // @description  Elegant usage monitor for ChatGPT models with daily quota tracking
 // @match        https://chatgpt.com/
 // @match        https://chatgpt.com/c/*
