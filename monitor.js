@@ -5,7 +5,7 @@
 // @updateURL    https://raw.githubusercontent.com/tizee/tampermonkey-chatgpt-model-usage-monitor/main/monitor.js
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=chatgpt.com
 // @author       tizee
-// @version      1.8.1
+// @version      1.8.2
 // @description  Elegant usage monitor for ChatGPT models with daily quota tracking
 // @match        https://chatgpt.com/
 // @match        https://chatgpt.com/c/*
@@ -20,9 +20,9 @@
 (function () {
     "use strict";
     // text-scramble animation
-     (()=>{var TextScrambler=(()=>{var l=Object.defineProperty;var c=Object.getOwnPropertyDescriptor;var u=Object.getOwnPropertyNames;var m=Object.prototype.hasOwnProperty;var d=(n,t)=>{for(var e in t)l(n,e,{get:t[e],enumerable:!0})},f=(n,t,e,s)=>{if(t&&typeof t=="object"||typeof t=="function")for(let i of u(t))!m.call(n,i)&&i!==e&&l(n,i,{get:()=>t[i],enumerable:!(s=c(t,i))||s.enumerable});return n};var g=n=>f(l({},"__esModule",{value:!0}),n);var T={};d(T,{default:()=>r});function _(n){let t=document.createTreeWalker(n,NodeFilter.SHOW_TEXT,{acceptNode:s=>s.nodeValue.trim()?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_SKIP}),e=[];for(;t.nextNode();)t.currentNode.nodeValue=t.currentNode.nodeValue.replace(/(\n|\r|\t)/gm,""),e.push(t.currentNode);return e}function p(n,t,e){return t<0||t>=n.length?n:n.substring(0,t)+e+n.substring(t+1)}function M(n,t){return n?"x":t[Math.floor(Math.random()*t.length)]}var r=class{constructor(t,e={}){this.el=t;let s={duration:1e3,delay:0,reverse:!1,absolute:!1,pointerEvents:!0,scrambleSymbols:"\u2014~\xB1\xA7|[].+$^@*()\u2022x%!?#",randomThreshold:null};this.config=Object.assign({},s,e),this.config.randomThreshold===null&&(this.config.randomThreshold=this.config.reverse?.1:.8),this.textNodes=_(this.el),this.nodeLengths=this.textNodes.map(i=>i.nodeValue.length),this.originalText=this.textNodes.map(i=>i.nodeValue).join(""),this.mask=this.originalText.split(" ").map(i=>"\xA0".repeat(i.length)).join(" "),this.currentMask=this.mask,this.totalChars=this.originalText.length,this.scrambleRange=Math.floor(this.totalChars*(this.config.reverse?.25:1.5)),this.direction=this.config.reverse?-1:1,this.config.absolute&&(this.el.style.position="absolute",this.el.style.top="0"),this.config.pointerEvents||(this.el.style.pointerEvents="none"),this._animationFrame=null,this._startTime=null,this._running=!1}initialize(){return this.currentMask=this.mask,this}_getEased(t){let e=-(Math.cos(Math.PI*t)-1)/2;return e=Math.pow(e,2),this.config.reverse?1-e:e}_updateScramble(t,e,s){if(Math.random()<.5&&t>0&&t<1)for(let i=0;i<20;i++){let o=i/20,a;if(this.config.reverse?a=e-Math.floor((1-Math.random())*this.scrambleRange*o):a=e+Math.floor((1-Math.random())*this.scrambleRange*o),!(a<0||a>=this.totalChars)&&this.currentMask[a]!==" "){let h=Math.random()>this.config.randomThreshold?this.originalText[a]:M(this.config.reverse,this.config.scrambleSymbols);this.currentMask=p(this.currentMask,a,h)}}}_composeOutput(t,e,s){let i="";if(this.config.reverse){let o=Math.max(e-s,0);i=this.mask.slice(0,o)+this.currentMask.slice(o,e)+this.originalText.slice(e)}else i=this.originalText.slice(0,e)+this.currentMask.slice(e,e+s)+this.mask.slice(e+s);return i}_updateTextNodes(t){let e=0;for(let s=0;s<this.textNodes.length;s++){let i=this.nodeLengths[s];this.textNodes[s].nodeValue=t.slice(e,e+i),e+=i}}_tick=t=>{this._startTime||(this._startTime=t);let e=t-this._startTime,s=Math.min(e/this.config.duration,1),i=this._getEased(s),o=Math.floor(this.totalChars*s),a=Math.floor(2*(.5-Math.abs(s-.5))*this.scrambleRange);this._updateScramble(s,o,a);let h=this._composeOutput(s,o,a);this._updateTextNodes(h),s<1?this._animationFrame=requestAnimationFrame(this._tick):this._running=!1};start(){this._running=!0,this._startTime=null,this.config.delay?setTimeout(()=>{this._animationFrame=requestAnimationFrame(this._tick)},this.config.delay):this._animationFrame=requestAnimationFrame(this._tick)}stop(){this._animationFrame&&(cancelAnimationFrame(this._animationFrame),this._animationFrame=null),this._running=!1}};return g(T);})();
-window.TextScrambler = TextScrambler.default || TextScrambler;
-     })();
+    (()=>{var TextScrambler=(()=>{var l=Object.defineProperty;var c=Object.getOwnPropertyDescriptor;var u=Object.getOwnPropertyNames;var m=Object.prototype.hasOwnProperty;var d=(n,t)=>{for(var e in t)l(n,e,{get:t[e],enumerable:!0})},f=(n,t,e,s)=>{if(t&&typeof t=="object"||typeof t=="function")for(let i of u(t))!m.call(n,i)&&i!==e&&l(n,i,{get:()=>t[i],enumerable:!(s=c(t,i))||s.enumerable});return n};var g=n=>f(l({},"__esModule",{value:!0}),n);var T={};d(T,{default:()=>r});function _(n){let t=document.createTreeWalker(n,NodeFilter.SHOW_TEXT,{acceptNode:s=>s.nodeValue.trim()?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_SKIP}),e=[];for(;t.nextNode();)t.currentNode.nodeValue=t.currentNode.nodeValue.replace(/(\n|\r|\t)/gm,""),e.push(t.currentNode);return e}function p(n,t,e){return t<0||t>=n.length?n:n.substring(0,t)+e+n.substring(t+1)}function M(n,t){return n?"x":t[Math.floor(Math.random()*t.length)]}var r=class{constructor(t,e={}){this.el=t;let s={duration:1e3,delay:0,reverse:!1,absolute:!1,pointerEvents:!0,scrambleSymbols:"\u2014~\xB1\xA7|[].+$^@*()\u2022x%!?#",randomThreshold:null};this.config=Object.assign({},s,e),this.config.randomThreshold===null&&(this.config.randomThreshold=this.config.reverse?.1:.8),this.textNodes=_(this.el),this.nodeLengths=this.textNodes.map(i=>i.nodeValue.length),this.originalText=this.textNodes.map(i=>i.nodeValue).join(""),this.mask=this.originalText.split(" ").map(i=>"\xA0".repeat(i.length)).join(" "),this.currentMask=this.mask,this.totalChars=this.originalText.length,this.scrambleRange=Math.floor(this.totalChars*(this.config.reverse?.25:1.5)),this.direction=this.config.reverse?-1:1,this.config.absolute&&(this.el.style.position="absolute",this.el.style.top="0"),this.config.pointerEvents||(this.el.style.pointerEvents="none"),this._animationFrame=null,this._startTime=null,this._running=!1}initialize(){return this.currentMask=this.mask,this}_getEased(t){let e=-(Math.cos(Math.PI*t)-1)/2;return e=Math.pow(e,2),this.config.reverse?1-e:e}_updateScramble(t,e,s){if(Math.random()<.5&&t>0&&t<1)for(let i=0;i<20;i++){let o=i/20,a;if(this.config.reverse?a=e-Math.floor((1-Math.random())*this.scrambleRange*o):a=e+Math.floor((1-Math.random())*this.scrambleRange*o),!(a<0||a>=this.totalChars)&&this.currentMask[a]!==" "){let h=Math.random()>this.config.randomThreshold?this.originalText[a]:M(this.config.reverse,this.config.scrambleSymbols);this.currentMask=p(this.currentMask,a,h)}}}_composeOutput(t,e,s){let i="";if(this.config.reverse){let o=Math.max(e-s,0);i=this.mask.slice(0,o)+this.currentMask.slice(o,e)+this.originalText.slice(e)}else i=this.originalText.slice(0,e)+this.currentMask.slice(e,e+s)+this.mask.slice(e+s);return i}_updateTextNodes(t){let e=0;for(let s=0;s<this.textNodes.length;s++){let i=this.nodeLengths[s];this.textNodes[s].nodeValue=t.slice(e,e+i),e+=i}}_tick=t=>{this._startTime||(this._startTime=t);let e=t-this._startTime,s=Math.min(e/this.config.duration,1),i=this._getEased(s),o=Math.floor(this.totalChars*s),a=Math.floor(2*(.5-Math.abs(s-.5))*this.scrambleRange);this._updateScramble(s,o,a);let h=this._composeOutput(s,o,a);this._updateTextNodes(h),s<1?this._animationFrame=requestAnimationFrame(this._tick):this._running=!1};start(){this._running=!0,this._startTime=null,this.config.delay?setTimeout(()=>{this._animationFrame=requestAnimationFrame(this._tick)},this.config.delay):this._animationFrame=requestAnimationFrame(this._tick)}stop(){this._animationFrame&&(cancelAnimationFrame(this._animationFrame),this._animationFrame=null),this._running=!1}};return g(T);})();
+          window.TextScrambler = TextScrambler.default || TextScrambler;
+         })();
 
 
     // Constants and Configuration
@@ -377,6 +377,52 @@ window.TextScrambler = TextScrambler.default || TextScrambler;
     text-decoration-line: underline;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
+
+    #chatUsageMonitor input {
+    width: 90%;
+    padding: ${STYLE.spacing.xs} ${STYLE.spacing.sm};
+    margin: 0;
+    border: 1px solid ${COLORS.border};
+    border-radius: 4px;
+    background: ${COLORS.surface};
+    color: ${COLORS.secondaryText};
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: ${STYLE.textSize.xs};
+    line-height: ${STYLE.lineHeight.xs};
+    transition: all 0.2s ease;
+  }
+
+  #chatUsageMonitor input:focus {
+    outline: none;
+    border-color: ${COLORS.yellow};
+    color: ${COLORS.yellow};
+    background: rgba(245, 158, 11, 0.1);
+  }
+
+  #chatUsageMonitor input:hover {
+    border-color: ${COLORS.yellow};
+    color: ${COLORS.yellow};
+  }
+
+  /* Toast notification for feedback */
+  #chatUsageMonitor .toast {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: ${COLORS.background};
+    color: ${COLORS.success};
+    padding: ${STYLE.spacing.sm} ${STYLE.spacing.md};
+    border-radius: ${STYLE.borderRadius};
+    border: 1px solid ${COLORS.success};
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 10000;
+  }
+
+  #chatUsageMonitor .toast.show {
+    opacity: 1;
+  }
 `);
 
     // State Management
@@ -429,13 +475,22 @@ window.TextScrambler = TextScrambler.default || TextScrambler;
         keyLabel.textContent = modelKey;
         row.appendChild(keyLabel);
 
+        // Display Name input cell (new field)
+        const nameInput = document.createElement("input");
+        nameInput.type = "text";
+        nameInput.value = model.displayName || modelKey;
+        nameInput.placeholder = "Display Name";
+        nameInput.dataset.modelKey = modelKey;
+        nameInput.dataset.field = "displayName";
+        row.appendChild(nameInput);
+
         // Daily Limit cell
         const limitInput = document.createElement("input");
         limitInput.type = "number";
-        limitInput.style.gridColumn = "span 2";
         limitInput.value = model.dailyLimit;
         limitInput.placeholder = "limit";
         limitInput.dataset.modelKey = modelKey;
+        limitInput.dataset.field = "dailyLimit";
         row.appendChild(limitInput);
 
         // Delete button cell
@@ -542,6 +597,7 @@ window.TextScrambler = TextScrambler.default || TextScrambler;
             delete usageData.models[modelKey];
             Storage.set(usageData);
             updateUI();
+            showToast(`Model "${modelKey}" deleted.`);
         }
     }
 
@@ -641,6 +697,36 @@ window.TextScrambler = TextScrambler.default || TextScrambler;
         info.style.color = COLORS.secondaryText;
         container.appendChild(info);
 
+        // Add table header for settings
+        const tableHeader = document.createElement("div");
+        tableHeader.className = "table-header";
+
+        const idHeader = document.createElement("div");
+        idHeader.textContent = "Model ID";
+        tableHeader.appendChild(idHeader);
+
+        const nameHeader = document.createElement("div");
+        nameHeader.textContent = "Display Name";
+        tableHeader.appendChild(nameHeader);
+
+        const limitHeader = document.createElement("div");
+        limitHeader.textContent = "Daily Limit";
+        tableHeader.appendChild(limitHeader);
+
+        const actionHeader = document.createElement("div");
+        actionHeader.textContent = "Action";
+        tableHeader.appendChild(actionHeader);
+
+        container.appendChild(tableHeader);
+
+        // Update CSS to accommodate the new column layout
+        GM_addStyle(`
+      #chatUsageMonitor .table-header,
+      #chatUsageMonitor .model-row {
+        grid-template-columns: 1.5fr 1.5fr 1fr 1fr;
+      }
+    `);
+
         Object.entries(usageData.models).forEach(([modelKey, model]) => {
             const row = createModelRow(model, modelKey, true);
             container.appendChild(row);
@@ -684,9 +770,11 @@ window.TextScrambler = TextScrambler.default || TextScrambler;
 
             inputs.forEach((input) => {
                 const modelKey = input.dataset.modelKey;
+                const field = input.dataset.field;
+
                 if (!modelKey || !usageData.models[modelKey]) return;
 
-                if (input.type === "text") {
+                if (field === "displayName") {
                     const newDisplayName = input.value.trim();
                     if (
                         newDisplayName &&
@@ -695,7 +783,7 @@ window.TextScrambler = TextScrambler.default || TextScrambler;
                         usageData.models[modelKey].displayName = newDisplayName;
                         hasChanges = true;
                     }
-                } else if (input.type === "number") {
+                } else if (field === "dailyLimit") {
                     const newLimit = parseInt(input.value, 10);
                     if (
                         !isNaN(newLimit) &&
@@ -710,9 +798,9 @@ window.TextScrambler = TextScrambler.default || TextScrambler;
             if (hasChanges) {
                 Storage.set(usageData);
                 updateUI();
-                alert("Settings saved successfully.");
+                showToast("Settings saved successfully.");
             } else {
-                alert("No changes detected.");
+                showToast("No changes detected.", "warning");
             }
         });
         container.appendChild(saveBtn);
@@ -736,15 +824,15 @@ window.TextScrambler = TextScrambler.default || TextScrambler;
         container.appendChild(selectContainer);
     }
 
-// Model Usage Tracking
-function incrementUsageForModel(modelId) {
-    // Ensure daily counts are reset if a new day has started using latest data usage.
-    usageData = Storage.get();
-    checkAndResetDaily();
+    // Model Usage Tracking
+    function incrementUsageForModel(modelId) {
+        // Ensure daily counts are reset if a new day has started using latest data usage.
+        usageData = Storage.get();
+        checkAndResetDaily();
 
-    if (!usageData.models[modelId]) {
-        console.debug(
-            `[monitor] No mapping found for model "${modelId}". Creating new entry.`
+        if (!usageData.models[modelId]) {
+            console.debug(
+                `[monitor] No mapping found for model "${modelId}". Creating new entry.`
       );
             usageData.models[modelId] = {
                 displayName: modelId,
@@ -766,229 +854,270 @@ function incrementUsageForModel(modelId) {
         updateUI();
     }
 
-// Daily Reset Check
-function checkAndResetDaily() {
-    if (usageData.lastReset !== getToday()) {
-        Object.values(usageData.models).forEach((model) => {
-            model.count = 0;
-            model.lastUpdate = "";
-        });
-        usageData.lastReset = getToday();
-        Storage.set(usageData);
-    }
-}
+    // Toast notification function
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('chatUsageMonitor');
 
-class Draggable {
-    constructor(element) {
-        this.element = element;
-        this.isDragging = false;
-        this.initialX = 0;
-        this.initialY = 0;
-        this.boundHandleMove = this.handleMove.bind(this);
-        this.boundHandleEnd = this.handleEnd.bind(this);
-        this.init();
-    }
-
-    init() {
-        const handle = this.element.querySelector('.drag-handle');
-        handle.addEventListener('mousedown', this.handleStart.bind(this));
-    }
-
-    handleStart(e) {
-        this.isDragging = true;
-        this.initialX = e.clientX - this.element.offsetLeft;
-        this.initialY = e.clientY - this.element.offsetTop;
-
-        document.addEventListener('mousemove', this.boundHandleMove);
-        document.addEventListener('mouseup', this.boundHandleEnd);
-        requestAnimationFrame(() => this.updatePosition());
-    }
-
-    handleMove(e) {
-        if (!this.isDragging) return;
-
-        this.currentX = e.clientX - this.initialX;
-        this.currentY = e.clientY - this.initialY;
-        this.applyBoundaryConstraints();
-    }
-
-    applyBoundaryConstraints() {
-        const rect = this.element.getBoundingClientRect();
-        const maxX = window.innerWidth - rect.width;
-        const maxY = window.innerHeight - rect.height;
-
-        this.currentX = Math.min(Math.max(0, this.currentX), maxX);
-        this.currentY = Math.min(Math.max(0, this.currentY), maxY);
-    }
-
-    updatePosition() {
-        if (!this.isDragging) return;
-
-        this.element.style.left = `${this.currentX}px`;
-        this.element.style.top = `${this.currentY}px`;
-        requestAnimationFrame(() => this.updatePosition());
-    }
-
-    handleEnd() {
-        this.isDragging = false;
-        document.removeEventListener('mousemove', this.boundHandleMove);
-        document.removeEventListener('mouseup', this.boundHandleEnd);
-
-        Storage.update(data => {
-            data.position = {
-                x: this.currentX,
-                y: this.currentY
-            };
-        });
-    }
-}
-let draggable;
-// UI Creation
-function createMonitorUI() {
-    if (document.getElementById("chatUsageMonitor")) return;
-
-    const container = document.createElement("div");
-    container.id = "chatUsageMonitor";
-
-    // Make container draggable
-    container.style.cursor = "move";
-
-    // Create header with icon tabs
-    const header = document.createElement("header");
-    const dragHandle = document.createElement("div");
-    dragHandle.className = "drag-handle";
-    header.appendChild(dragHandle);
-
-    // Set initial position
-    if (usageData.position.x !== null && usageData.position.y !== null) {
-        // Ensure position is within viewport
-        const maxX = window.innerWidth - 360; // container width
-        const maxY = window.innerHeight - 500; // container max-height
-        container.style.right = "auto";
-        container.style.bottom = "auto";
-        container.style.left = `${Math.min(
-            Math.max(0, usageData.position.x),
-            maxX
-        )}px`;
-        container.style.top = `${Math.min(
-            Math.max(0, usageData.position.y),
-            maxY
-        )}px`;
-    } else {
-        // bottom-right by default
-        container.style.right = STYLE.spacing.lg;
-        container.style.bottom = STYLE.spacing.lg;
-        container.style.left = "auto";
-        container.style.top = "auto";
-    }
-
-    const usageTabBtn = document.createElement("button");
-    usageTabBtn.innerHTML = `<span>Usage</span>`;
-    usageTabBtn.classList.add("active");
-
-    const settingsTabBtn = document.createElement("button");
-    settingsTabBtn.innerHTML = `<span>Settings</span>`;
-
-    header.appendChild(usageTabBtn);
-    header.appendChild(settingsTabBtn);
-    container.appendChild(header);
-
-    container.style.cursor = "default";
-
-
-    // Create content panels
-    const usageContent = document.createElement("div");
-    usageContent.className = "content";
-    usageContent.id = "usageContent";
-    container.appendChild(usageContent);
-
-    const settingsContent = document.createElement("div");
-    settingsContent.className = "content";
-    settingsContent.id = "settingsContent";
-    settingsContent.style.display = "none";
-    container.appendChild(settingsContent);
-
-    // Add tab switching logic
-    usageTabBtn.addEventListener("click", () => {
-        usageTabBtn.classList.add("active");
-        settingsTabBtn.classList.remove("active");
-        usageContent.style.display = "";
-        settingsContent.style.display = "none";
-    });
-
-    settingsTabBtn.addEventListener("click", () => {
-        settingsTabBtn.classList.add("active");
-        usageTabBtn.classList.remove("active");
-        settingsContent.style.display = "";
-        usageContent.style.display = "none";
-    });
-
-    document.body.appendChild(container);
-    draggable = new Draggable(container);
-    console.debug("[monitor] create ui");
-    console.debug("[monitor] draggable", draggable);
-    updateUI();
-}
-
-// Fetch Interception
-const target_window =
-      typeof unsafeWindow === "undefined" ? window : unsafeWindow;
-const originalFetch = target_window.fetch;
-
-target_window.fetch = new Proxy(originalFetch, {
-    apply: async function (target, thisArg, args) {
-        const response = await target.apply(thisArg, args);
-
-        try {
-            const [requestInfo, requestInit] = args;
-            const fetchUrl =
-                  typeof requestInfo === "string" ? requestInfo : requestInfo?.href;
-
-            if (
-                requestInit?.method === "POST" &&
-                fetchUrl?.endsWith("/conversation")
-            ) {
-                const bodyText = requestInit.body;
-                const bodyObj = JSON.parse(bodyText);
-
-                if (bodyObj?.model) {
-                    console.debug("[monitor] Detected model usage:", bodyObj.model);
-                    incrementUsageForModel(bodyObj.model);
-                }
-            }
-        } catch (error) {
-            console.warn("[monitor] Failed to process request:", error);
+        // Remove any existing toast
+        const existingToast = container.querySelector('.toast');
+        if (existingToast) {
+            existingToast.remove();
         }
 
-        return response;
-    },
-});
+        // Create new toast
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = message;
 
-// Initialization
-function initialize() {
-    checkAndResetDaily();
-    createMonitorUI();
-}
+        // Set color based on type
+        if (type === 'error') {
+            toast.style.color = COLORS.danger;
+            toast.style.borderColor = COLORS.danger;
+        } else if (type === 'warning') {
+            toast.style.color = COLORS.warning;
+            toast.style.borderColor = COLORS.warning;
+        }
 
-// Setup Observers and Event Listeners
-if (document.readyState === "loading") {
-    target_window.addEventListener("DOMContentLoaded", initialize);
-} else {
-    initialize();
-}
+        container.appendChild(toast);
 
-// Observer for dynamic content changes
-const observer = new MutationObserver(() => {
-    if (!document.getElementById("chatUsageMonitor")) {
+        // Show toast
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 10);
+
+        // Hide toast after 3 seconds
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                toast.remove();
+            }, 300);
+        }, 3000);
+    }
+
+    // Daily Reset Check
+    function checkAndResetDaily() {
+        if (usageData.lastReset !== getToday()) {
+            Object.values(usageData.models).forEach((model) => {
+                model.count = 0;
+                model.lastUpdate = "";
+            });
+            usageData.lastReset = getToday();
+            Storage.set(usageData);
+        }
+    }
+
+    class Draggable {
+        constructor(element) {
+            this.element = element;
+            this.isDragging = false;
+            this.initialX = 0;
+            this.initialY = 0;
+            this.boundHandleMove = this.handleMove.bind(this);
+            this.boundHandleEnd = this.handleEnd.bind(this);
+            this.init();
+        }
+
+        init() {
+            const handle = this.element.querySelector('.drag-handle');
+            handle.addEventListener('mousedown', this.handleStart.bind(this));
+        }
+
+        handleStart(e) {
+            this.isDragging = true;
+            this.initialX = e.clientX - this.element.offsetLeft;
+            this.initialY = e.clientY - this.element.offsetTop;
+
+            document.addEventListener('mousemove', this.boundHandleMove);
+            document.addEventListener('mouseup', this.boundHandleEnd);
+            requestAnimationFrame(() => this.updatePosition());
+        }
+
+        handleMove(e) {
+            if (!this.isDragging) return;
+
+            this.currentX = e.clientX - this.initialX;
+            this.currentY = e.clientY - this.initialY;
+            this.applyBoundaryConstraints();
+        }
+
+        applyBoundaryConstraints() {
+            const rect = this.element.getBoundingClientRect();
+            const maxX = window.innerWidth - rect.width;
+            const maxY = window.innerHeight - rect.height;
+
+            this.currentX = Math.min(Math.max(0, this.currentX), maxX);
+            this.currentY = Math.min(Math.max(0, this.currentY), maxY);
+        }
+
+        updatePosition() {
+            if (!this.isDragging) return;
+
+            this.element.style.left = `${this.currentX}px`;
+            this.element.style.top = `${this.currentY}px`;
+            requestAnimationFrame(() => this.updatePosition());
+        }
+
+        handleEnd() {
+            this.isDragging = false;
+            document.removeEventListener('mousemove', this.boundHandleMove);
+            document.removeEventListener('mouseup', this.boundHandleEnd);
+
+            Storage.update(data => {
+                data.position = {
+                    x: this.currentX,
+                    y: this.currentY
+                };
+            });
+        }
+    }
+    let draggable;
+    // UI Creation
+    function createMonitorUI() {
+        if (document.getElementById("chatUsageMonitor")) return;
+
+        const container = document.createElement("div");
+        container.id = "chatUsageMonitor";
+
+        // Make container draggable
+        container.style.cursor = "move";
+
+        // Create header with icon tabs
+        const header = document.createElement("header");
+        const dragHandle = document.createElement("div");
+        dragHandle.className = "drag-handle";
+        header.appendChild(dragHandle);
+
+        // Set initial position
+        if (usageData.position.x !== null && usageData.position.y !== null) {
+            // Ensure position is within viewport
+            const maxX = window.innerWidth - 360; // container width
+            const maxY = window.innerHeight - 500; // container max-height
+            container.style.right = "auto";
+            container.style.bottom = "auto";
+            container.style.left = `${Math.min(
+                Math.max(0, usageData.position.x),
+                maxX
+            )}px`;
+            container.style.top = `${Math.min(
+                Math.max(0, usageData.position.y),
+                maxY
+            )}px`;
+        } else {
+            // bottom-right by default
+            container.style.right = STYLE.spacing.lg;
+            container.style.bottom = STYLE.spacing.lg;
+            container.style.left = "auto";
+            container.style.top = "auto";
+        }
+
+        const usageTabBtn = document.createElement("button");
+        usageTabBtn.innerHTML = `<span>Usage</span>`;
+        usageTabBtn.classList.add("active");
+
+        const settingsTabBtn = document.createElement("button");
+        settingsTabBtn.innerHTML = `<span>Settings</span>`;
+
+        header.appendChild(usageTabBtn);
+        header.appendChild(settingsTabBtn);
+        container.appendChild(header);
+
+        container.style.cursor = "default";
+
+
+        // Create content panels
+        const usageContent = document.createElement("div");
+        usageContent.className = "content";
+        usageContent.id = "usageContent";
+        container.appendChild(usageContent);
+
+        const settingsContent = document.createElement("div");
+        settingsContent.className = "content";
+        settingsContent.id = "settingsContent";
+        settingsContent.style.display = "none";
+        container.appendChild(settingsContent);
+
+        // Add tab switching logic
+        usageTabBtn.addEventListener("click", () => {
+            usageTabBtn.classList.add("active");
+            settingsTabBtn.classList.remove("active");
+            usageContent.style.display = "";
+            settingsContent.style.display = "none";
+        });
+
+        settingsTabBtn.addEventListener("click", () => {
+            settingsTabBtn.classList.add("active");
+            usageTabBtn.classList.remove("active");
+            settingsContent.style.display = "";
+            usageContent.style.display = "none";
+        });
+
+        document.body.appendChild(container);
+        draggable = new Draggable(container);
+        console.debug("[monitor] create ui");
+        console.debug("[monitor] draggable", draggable);
+        updateUI();
+    }
+
+    // Fetch Interception
+    const target_window =
+          typeof unsafeWindow === "undefined" ? window : unsafeWindow;
+    const originalFetch = target_window.fetch;
+
+    target_window.fetch = new Proxy(originalFetch, {
+        apply: async function (target, thisArg, args) {
+            const response = await target.apply(thisArg, args);
+
+            try {
+                const [requestInfo, requestInit] = args;
+                const fetchUrl =
+                      typeof requestInfo === "string" ? requestInfo : requestInfo?.href;
+
+                if (
+                    requestInit?.method === "POST" &&
+                    fetchUrl?.endsWith("/conversation")
+                ) {
+                    const bodyText = requestInit.body;
+                    const bodyObj = JSON.parse(bodyText);
+
+                    if (bodyObj?.model) {
+                        console.debug("[monitor] Detected model usage:", bodyObj.model);
+                        incrementUsageForModel(bodyObj.model);
+                    }
+                }
+            } catch (error) {
+                console.warn("[monitor] Failed to process request:", error);
+            }
+
+            return response;
+        },
+    });
+
+    // Initialization
+    function initialize() {
+        checkAndResetDaily();
+        createMonitorUI();
+    }
+
+    // Setup Observers and Event Listeners
+    if (document.readyState === "loading") {
+        target_window.addEventListener("DOMContentLoaded", initialize);
+    } else {
         initialize();
     }
-});
 
-observer.observe(document.documentElement || document.body, {
-    childList: true,
-    subtree: true,
-});
+    // Observer for dynamic content changes
+    const observer = new MutationObserver(() => {
+        if (!document.getElementById("chatUsageMonitor")) {
+            initialize();
+        }
+    });
 
-// Handle navigation events
-window.addEventListener("popstate", initialize);
+    observer.observe(document.documentElement || document.body, {
+        childList: true,
+        subtree: true,
+    });
+
+    // Handle navigation events
+    window.addEventListener("popstate", initialize);
 })();
+
