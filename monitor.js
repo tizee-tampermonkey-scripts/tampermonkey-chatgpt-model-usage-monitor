@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         ChatGPT Model Usage Monitor
 // @namespace    https://github.com/tizee/tampermonkey-chatgpt-model-usage-monitor
-// @downloadURL  https://raw.githubusercontent.com/tizee/tampermonkey-chatgpt-model-usage-monitor/main/monitor.js
-// @updateURL    https://raw.githubusercontent.com/tizee/tampermonkey-chatgpt-model-usage-monitor/main/monitor.js
+// @downloadURL  https://raw.githubusercontent.com/tizee-tampermonkey-scripts/tampermonkey-chatgpt-model-usage-monitor/refs/heads/main/monitor.js
+// @updateURL    https://raw.githubusercontent.com/tizee-tampermonkey-scripts/tampermonkey-chatgpt-model-usage-monitor/refs/heads/main/monitor.js
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=chatgpt.com
 // @author       tizee
 // @version      1.8.2

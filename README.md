@@ -51,6 +51,12 @@ This project is licensed under the MIT License. See the [LICENSE](https://github
 
 Contributions are welcome! Please open an issue or submit a pull request for any improvements or bug fixes.
 
+## Text Scramble Animation
+
+I'm currently working with compiled animation code, so the readability is quite poor.
+
+Please see [text-scrambler.js](https://github.com/tizee/text-scrambler.js) if you're curious about how it works.
+
 ## Author
 
 [tizee](https://github.com/tizee)
