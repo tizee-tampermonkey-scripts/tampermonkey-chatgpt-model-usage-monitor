@@ -53,9 +53,7 @@ Contributions are welcome! Please open an issue or submit a pull request for any
 
 ## Text Scramble Animation
 
-I'm currently working with compiled animation code, so the readability is quite poor.
-
-Please see [text-scrambler.js](https://github.com/tizee/text-scrambler.js) if you're curious about how it works.
+The text animation effect is now implemented using an external reference to [text-scrambler.js](https://github.com/tizee/text-scrambler.js).
 
 ## Author
 
