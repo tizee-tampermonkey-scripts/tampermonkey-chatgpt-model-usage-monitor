@@ -6,7 +6,7 @@
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=chatgpt.com
 // @require      https://cdn.jsdelivr.net/npm/text-scrambler.js@1.0.3/dist/text-scrambler.min.js
 // @author       tizee
-// @version      1.8.3
+// @version      1.9.0
 // @description  Elegant usage monitor for ChatGPT models with daily quota tracking
 // @match        https://chatgpt.com/
 // @match        https://chatgpt.com/c/*
@@ -75,6 +75,7 @@
     // Default Configuration
     const defaultUsageData = {
         position: { x: null, y: null },
+        isCollapsed: false,
         lastReset: getToday(),
         progressType: "dots", // dots or bar
         models: {
@@ -112,29 +113,16 @@
   }
 
   #chatUsageMonitor header {
-    padding: 0 ${STYLE.spacing.md};
+    padding: ${STYLE.spacing.xs} ${STYLE.spacing.md};
     display: flex;
     border-radius: ${STYLE.borderRadius} ${STYLE.borderRadius} 0 0;
     background: ${COLORS.background};
     flex-direction: row;
-    position: relative;
+    align-items: center;
   }
 
-  #chatUsageMonitor .drag-handle {
-    width: 12px;
-    height: 12px;
-    position: absolute;
-    right: 8px;
-    top: 50%;
-    transform: translateY(-50%);
-    border-radius: 50%;
-    background: ${COLORS.secondaryText};
+  #chatUsageMonitor header {
     cursor: move;
-    transition: background-color 0.2s ease;
-  }
-
-  #chatUsageMonitor .drag-handle:hover {
-    background: ${COLORS.yellow};
   }
 
   #chatUsageMonitor header button {
@@ -210,22 +198,13 @@
      color: ${COLORS.danger};
   }
 
+  /* Always hide scrollbar */
+  #chatUsageMonitor {
+    scrollbar-width: none; /* Firefox */
+  }
+
   #chatUsageMonitor::-webkit-scrollbar {
-    width: 8px;
-  }
-
-  #chatUsageMonitor::-webkit-scrollbar-track {
-    background: ${COLORS.surface};
-    border-radius: 4px;
-  }
-
-  #chatUsageMonitor::-webkit-scrollbar-thumb {
-    background: ${COLORS.border};
-    border-radius: 4px;
-  }
-
-  #chatUsageMonitor::-webkit-scrollbar-thumb:hover {
-    background: ${COLORS.secondaryText};
+    display: none; /* Chrome/Safari */
   }
 
     #chatUsageMonitor .progress-container {
@@ -419,6 +398,36 @@
   #chatUsageMonitor .toast.show {
     opacity: 1;
   }
+
+  /* Collapse functionality - vertical slide animation */
+  #chatUsageMonitor .content {
+    max-height: 450px;
+    overflow: hidden;
+    transition: max-height 0.2s ease-out, padding 0.2s ease-out, opacity 0.15s ease-out;
+    opacity: 1;
+  }
+
+  #chatUsageMonitor.collapsed {
+    max-height: none;
+    overflow: visible;
+  }
+
+  #chatUsageMonitor.collapsed .content {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    opacity: 0;
+  }
+
+  #chatUsageMonitor .collapse-btn {
+    margin-left: auto;
+    margin-right: 0 !important;
+  }
+
+  /* Edge snap indicator */
+  #chatUsageMonitor.snapping {
+    transition: left 0.15s ease-out, top 0.15s ease-out;
+  }
 `);
 
     // State Management
@@ -436,6 +445,10 @@
             }
             if (!usageData.progressType) {
                 usageData.progressType = "dots";
+                this.set(usageData);
+            }
+            if (usageData.isCollapsed === undefined) {
+                usageData.isCollapsed = false;
                 this.set(usageData);
             }
             console.debug("[monitor] get usageData:", usageData);
@@ -903,25 +916,34 @@
     }
 
     class Draggable {
-        constructor(element) {
+        constructor(element, options = {}) {
             this.element = element;
             this.isDragging = false;
             this.initialX = 0;
             this.initialY = 0;
+            // Edge snap threshold in pixels
+            this.snapThreshold = options.snapThreshold || 30;
             this.boundHandleMove = this.handleMove.bind(this);
             this.boundHandleEnd = this.handleEnd.bind(this);
             this.init();
         }
 
         init() {
-            const handle = this.element.querySelector('.drag-handle');
-            handle.addEventListener('mousedown', this.handleStart.bind(this));
+            // Allow dragging from header
+            const header = this.element.querySelector('header');
+            if (header) {
+                header.addEventListener('mousedown', (e) => this.handleStart(e));
+            }
         }
 
         handleStart(e) {
+            // Don't start drag on button clicks
+            if (e.target.tagName === 'BUTTON' || e.target.tagName === 'SPAN') return;
+
             this.isDragging = true;
             this.initialX = e.clientX - this.element.offsetLeft;
             this.initialY = e.clientY - this.element.offsetTop;
+            this.element.classList.remove('snapping');
 
             document.addEventListener('mousemove', this.boundHandleMove);
             document.addEventListener('mouseup', this.boundHandleEnd);
@@ -945,6 +967,41 @@
             this.currentY = Math.min(Math.max(0, this.currentY), maxY);
         }
 
+        // Calculate snap position based on proximity to edges
+        calculateSnapPosition() {
+            const rect = this.element.getBoundingClientRect();
+            const maxX = window.innerWidth - rect.width;
+            const maxY = window.innerHeight - rect.height;
+
+            let snapX = this.currentX;
+            let snapY = this.currentY;
+            let snapped = false;
+
+            // Snap to left edge
+            if (this.currentX <= this.snapThreshold) {
+                snapX = 0;
+                snapped = true;
+            }
+            // Snap to right edge
+            else if (this.currentX >= maxX - this.snapThreshold) {
+                snapX = maxX;
+                snapped = true;
+            }
+
+            // Snap to top edge
+            if (this.currentY <= this.snapThreshold) {
+                snapY = 0;
+                snapped = true;
+            }
+            // Snap to bottom edge
+            else if (this.currentY >= maxY - this.snapThreshold) {
+                snapY = maxY;
+                snapped = true;
+            }
+
+            return { x: snapX, y: snapY, snapped };
+        }
+
         updatePosition() {
             if (!this.isDragging) return;
 
@@ -957,6 +1014,21 @@
             this.isDragging = false;
             document.removeEventListener('mousemove', this.boundHandleMove);
             document.removeEventListener('mouseup', this.boundHandleEnd);
+
+            // Apply edge snapping
+            const snapResult = this.calculateSnapPosition();
+            if (snapResult.snapped) {
+                this.element.classList.add('snapping');
+                this.currentX = snapResult.x;
+                this.currentY = snapResult.y;
+                this.element.style.left = `${this.currentX}px`;
+                this.element.style.top = `${this.currentY}px`;
+
+                // Remove transition class after animation
+                setTimeout(() => {
+                    this.element.classList.remove('snapping');
+                }, 150);
+            }
 
             Storage.update(data => {
                 data.position = {
@@ -974,14 +1046,8 @@
         const container = document.createElement("div");
         container.id = "chatUsageMonitor";
 
-        // Make container draggable
-        container.style.cursor = "move";
-
-        // Create header with icon tabs
+        // Create header with tab buttons (draggable)
         const header = document.createElement("header");
-        const dragHandle = document.createElement("div");
-        dragHandle.className = "drag-handle";
-        header.appendChild(dragHandle);
 
         // Set initial position
         if (usageData.position.x !== null && usageData.position.y !== null) {
@@ -1007,18 +1073,71 @@
         }
 
         const usageTabBtn = document.createElement("button");
-        usageTabBtn.innerHTML = `<span>Usage</span>`;
+        usageTabBtn.textContent = "Usage";
         usageTabBtn.classList.add("active");
 
         const settingsTabBtn = document.createElement("button");
-        settingsTabBtn.innerHTML = `<span>Settings</span>`;
+        settingsTabBtn.textContent = "Settings";
+
+        // Collapse/Expand button (TUI style) - placed after tab buttons
+        const collapseBtn = document.createElement("button");
+        collapseBtn.className = "collapse-btn";
+        collapseBtn.textContent = usageData.isCollapsed ? "[+]" : "[-]";
+        collapseBtn.title = usageData.isCollapsed ? "Expand panel" : "Collapse panel";
+        collapseBtn.addEventListener("click", () => {
+            const wasCollapsed = usageData.isCollapsed;
+            usageData.isCollapsed = !usageData.isCollapsed;
+            Storage.set(usageData);
+            container.classList.toggle("collapsed", usageData.isCollapsed);
+            collapseBtn.textContent = usageData.isCollapsed ? "[+]" : "[-]";
+            collapseBtn.title = usageData.isCollapsed ? "Expand panel" : "Collapse panel";
+
+            // When expanding, check if panel would overflow and adjust position
+            if (wasCollapsed && !usageData.isCollapsed) {
+                // Wait for animation to complete then check bounds
+                setTimeout(() => {
+                    const expandedWidth = 360;
+                    const expandedHeight = Math.min(container.scrollHeight, 500);
+                    const currentX = container.offsetLeft;
+                    const currentY = container.offsetTop;
+
+                    let newX = currentX;
+                    let newY = currentY;
+                    let needsAdjustment = false;
+
+                    // Check right edge overflow
+                    if (currentX + expandedWidth > window.innerWidth) {
+                        newX = Math.max(0, window.innerWidth - expandedWidth);
+                        needsAdjustment = true;
+                    }
+
+                    // Check bottom edge overflow
+                    if (currentY + expandedHeight > window.innerHeight) {
+                        newY = Math.max(0, window.innerHeight - expandedHeight);
+                        needsAdjustment = true;
+                    }
+
+                    if (needsAdjustment) {
+                        container.classList.add("snapping");
+                        container.style.left = `${newX}px`;
+                        container.style.top = `${newY}px`;
+
+                        // Save new position
+                        usageData.position = { x: newX, y: newY };
+                        Storage.set(usageData);
+
+                        setTimeout(() => {
+                            container.classList.remove("snapping");
+                        }, 150);
+                    }
+                }, 220); // Wait for max-height transition (200ms) + buffer
+            }
+        });
 
         header.appendChild(usageTabBtn);
         header.appendChild(settingsTabBtn);
+        header.appendChild(collapseBtn);
         container.appendChild(header);
-
-        container.style.cursor = "default";
-
 
         // Create content panels
         const usageContent = document.createElement("div");
@@ -1046,6 +1165,11 @@
             settingsContent.style.display = "";
             usageContent.style.display = "none";
         });
+
+        // Apply initial collapsed state
+        if (usageData.isCollapsed) {
+            container.classList.add("collapsed");
+        }
 
         document.body.appendChild(container);
         draggable = new Draggable(container);
